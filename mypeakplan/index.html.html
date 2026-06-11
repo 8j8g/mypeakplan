@@ -1,0 +1,2482 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PeakPlan</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="icon" href="favicon2.png" type="image/png">
+</head>
+
+<style>
+:root {
+  --bg: #0B0A08;
+  --bg2: #14110D;
+  --surface: #1A1714;
+  --surface2: #221E18;
+  --border: #322C22;
+  --gold: #D4AF55;
+  --gold2: #F2D88A;
+  --cream: #F7F1E6;
+  --text: #ECE3D2;
+  --text-muted: #897F6C;
+  --text-dim: #524A3A;
+  --accent: #D4AF55;
+  --danger: #D17B7B;
+  --success: #79B488;
+  --warning: #D4AF55;
+  --radius: 14px;
+  --shadow: 0 8px 40px rgba(0,0,0,0.5);
+}
+
+.settings-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)) !important;
+  gap: 20px !important;
+  align-content: start !important;
+  width: 100% !important;
+}
+
+.card {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 16px !important;
+  padding: 20px !important;
+  box-sizing: border-box !important;
+}
+
+.setting-row {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  width: 100% !important;
+}
+
+[dir="rtl"] .settings-grid { direction: rtl !important; }
+[dir="rtl"] .card { text-align: right !important; }
+[dir="rtl"] .setting-row { align-items: flex-start !important; }
+[dir="rtl"] * { font-family: 'Outfit', 'Segoe UI', sans-serif; }
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  font-family: 'Outfit', sans-serif;
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+}
+
+/* ══ LICENSE SCREEN ══ */
+#licenseScreen {
+  position: fixed; inset: 0; z-index: 1000;
+  background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column;
+}
+
+.license-bg {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 30% 50%, rgba(201,168,76,0.06) 0%, transparent 60%),
+              radial-gradient(ellipse at 70% 20%, rgba(201,168,76,0.04) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.license-container {
+  position: relative; z-index: 1;
+  width: 100%; max-width: 440px;
+  padding: 20px;
+}
+
+.license-logo {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.license-logo-text {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 56px; font-weight: 700;
+  color: var(--cream);
+  letter-spacing: 2px;
+  line-height: 1;
+}
+
+.license-logo-text span { color: var(--gold); }
+
+.license-logo-sub {
+  font-size: 12px; color: var(--text-muted);
+  letter-spacing: 3px; text-transform: uppercase;
+  margin-top: 10px;
+}
+
+.license-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 36px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+
+.license-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px; font-weight: 600;
+  color: var(--cream); text-align: center;
+  margin-bottom: 8px;
+}
+
+.license-sub {
+  font-size: 13px; color: var(--text-muted);
+  text-align: center; margin-bottom: 28px;
+  line-height: 1.5;
+}
+
+.license-field { margin-bottom: 16px; }
+
+.license-label {
+  font-size: 11px; font-weight: 500;
+  color: var(--text-muted); text-transform: uppercase;
+  letter-spacing: 1.5px; margin-bottom: 8px; display: block;
+}
+
+.license-input {
+  width: 100%; padding: 14px 16px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-family: 'Outfit', monospace; font-size: 15px;
+  color: var(--text); outline: none;
+  transition: border-color 0.2s;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.license-input:focus { border-color: var(--gold); }
+.license-input::placeholder { color: var(--text-dim); text-transform: none; letter-spacing: 0; }
+
+.license-btn {
+  width: 100%; padding: 14px;
+  background: var(--gold);
+  color: #0F0E0C;
+  border: none; border-radius: 10px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 14px; font-weight: 600;
+  cursor: pointer; margin-top: 8px;
+  transition: all 0.2s; letter-spacing: 0.5px;
+}
+
+.license-btn:hover { background: var(--gold2); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(201,168,76,0.3); }
+.license-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.license-error {
+  background: rgba(196,112,112,0.1);
+  border: 1px solid rgba(196,112,112,0.3);
+  border-radius: 8px; padding: 10px 14px;
+  font-size: 13px; color: var(--danger);
+  margin-top: 12px; display: none; text-align: center;
+}
+
+.license-footer {
+  text-align: center; margin-top: 24px;
+  font-size: 12px; color: var(--text-dim);
+  line-height: 1.6;
+}
+
+.license-footer a {
+  color: var(--gold); text-decoration: none;
+}
+
+.license-footer a:hover { text-decoration: underline; }
+
+.license-divider {
+  display: flex; align-items: center; gap: 12px;
+  margin: 20px 0; color: var(--text-dim); font-size: 12px;
+}
+
+.license-divider::before, .license-divider::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
+}
+
+/* ══ APP LAYOUT ══ */
+#app { display: none; min-height: 100vh; opacity: 0; transition: opacity 1s ease; }
+#app.show { display: block; opacity: 1; }
+
+/* ══ CINEMATIC INTRO ══ */
+#introScreen {
+  position: fixed; inset: 0; z-index: 2000;
+  background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+#introScreen::before {
+  content: '';
+  position: absolute; inset: -50%;
+  background: radial-gradient(circle at 50% 50%, rgba(232,201,106,0.18) 0%, rgba(201,168,76,0.06) 30%, transparent 65%);
+  animation: introPulse 3.2s ease-in-out infinite;
+}
+#introScreen::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(90deg, transparent 0 2px, rgba(255,255,255,0.012) 2px 4px);
+  pointer-events: none;
+}
+@keyframes introPulse {
+  0%, 100% { transform: scale(0.9) rotate(0deg); opacity: 0.7; }
+  50% { transform: scale(1.15) rotate(8deg); opacity: 1; }
+}
+.intro-rays {
+  position: absolute; inset: 0; margin: auto;
+  width: 1200px; height: 1200px;
+  background: conic-gradient(from 0deg, transparent 0deg, rgba(232,201,106,0.08) 8deg, transparent 16deg, transparent 40deg, rgba(232,201,106,0.05) 48deg, transparent 56deg, transparent 90deg, rgba(232,201,106,0.07) 98deg, transparent 106deg, transparent 150deg, rgba(232,201,106,0.05) 158deg, transparent 166deg, transparent 220deg, rgba(232,201,106,0.06) 228deg, transparent 236deg, transparent 300deg, rgba(232,201,106,0.05) 308deg, transparent 316deg);
+  animation: introSpin 14s linear infinite;
+  opacity: 0.6;
+}
+@keyframes introSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.intro-content { position: relative; z-index: 2; text-align: center; }
+.intro-logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 78px; font-weight: 700;
+  color: var(--cream);
+  letter-spacing: 10px; line-height: 1;
+  opacity: 0; filter: blur(18px);
+  transform: scale(0.8) translateY(30px);
+  animation: introLogoReveal 1.6s cubic-bezier(.16,1,.3,1) 0.3s forwards;
+}
+.intro-logo span {
+  background: linear-gradient(120deg, var(--gold) 0%, var(--gold2) 35%, #fff8e0 50%, var(--gold2) 65%, var(--gold) 100%);
+  background-size: 250% 100%;
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  animation: introShimmer 2.8s linear infinite 1.6s;
+}
+@keyframes introLogoReveal {
+  0% { opacity: 0; filter: blur(18px); transform: scale(0.8) translateY(30px); letter-spacing: 30px; }
+  60% { opacity: 1; filter: blur(0px); }
+  100% { opacity: 1; filter: blur(0px); transform: scale(1) translateY(0); letter-spacing: 10px; }
+}
+@keyframes introShimmer { 0% { background-position: 0% 0%; } 100% { background-position: -250% 0%; } }
+.intro-sub {
+  margin-top: 18px; font-size: 12px; letter-spacing: 6px; text-transform: uppercase;
+  color: var(--text-muted); opacity: 0;
+  animation: introFadeUp 1s ease 1.4s forwards;
+}
+@keyframes introFadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+.intro-line {
+  margin: 28px auto 0; width: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  animation: introLineGrow 1.4s cubic-bezier(.22,1,.36,1) 1.6s forwards;
+}
+@keyframes introLineGrow { to { width: 220px; } }
+.intro-particles span {
+  position: absolute; width: 3px; height: 3px; border-radius: 50%;
+  background: var(--gold2); opacity: 0;
+  animation: introFloat 3s ease-in-out infinite;
+  box-shadow: 0 0 8px var(--gold2);
+}
+@keyframes introFloat {
+  0% { opacity: 0; transform: translateY(40px) scale(0.5); }
+  20% { opacity: 1; }
+  80% { opacity: 0.8; }
+  100% { opacity: 0; transform: translateY(-220px) scale(1.2); }
+}
+#introScreen.fade-out { animation: introFadeOut 0.9s ease forwards; pointer-events: none; }
+@keyframes introFadeOut { to { opacity: 0; transform: scale(1.06); filter: blur(6px); } }
+
+.layout { display: flex; min-height: 100vh; }
+
+.sidebar {
+  width: 240px; min-height: 100vh;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  position: fixed; left: 0; top: 0; bottom: 0;
+  z-index: 100; transition: transform 0.3s;
+}
+
+[dir="rtl"] .sidebar { left: auto; right: 0; border-right: none; border-left: 1px solid var(--border); }
+
+.sidebar-logo {
+  padding: 28px 24px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.sidebar-logo-text {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 28px; font-weight: 700;
+  color: var(--cream); letter-spacing: 1px;
+}
+
+.sidebar-logo-text span { color: var(--gold); }
+
+.sidebar-user {
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px;
+}
+
+.user-avatar {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, var(--gold), var(--gold2));
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 700; color: #0F0E0C;
+  flex-shrink: 0;
+}
+
+.user-name { font-size: 13px; font-weight: 500; color: var(--text); }
+.user-plan { font-size: 10px; color: var(--gold); text-transform: uppercase; letter-spacing: 1px; }
+
+.sidebar-nav { flex: 1; padding: 16px 12px; }
+
+.nav-section {
+  font-size: 10px; font-weight: 600;
+  color: var(--text-dim); text-transform: uppercase;
+  letter-spacing: 2px; padding: 0 12px;
+  margin: 16px 0 8px;
+}
+
+.nav-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 12px; border-radius: 10px;
+  font-size: 13px; font-weight: 500;
+  color: var(--text-muted); cursor: pointer;
+  transition: all 0.15s; margin-bottom: 2px;
+}
+
+.nav-item:hover { background: var(--surface2); color: var(--text); }
+.nav-item.active { background: rgba(201,168,76,0.12); color: var(--gold); }
+.nav-item .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+
+.sidebar-bottom {
+  padding: 16px 12px;
+  border-top: 1px solid var(--border);
+}
+
+.lang-select {
+  width: 100%; padding: 9px 12px;
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 8px; color: var(--text);
+  font-family: 'Outfit', sans-serif; font-size: 12px;
+  outline: none; cursor: pointer; margin-bottom: 8px;
+}
+
+.logout-btn {
+  width: 100%; padding: 9px;
+  background: transparent; border: 1px solid var(--border);
+  border-radius: 8px; color: var(--text-muted);
+  font-family: 'Outfit', sans-serif; font-size: 12px;
+  cursor: pointer; transition: all 0.2s;
+}
+
+.logout-btn:hover { border-color: var(--danger); color: var(--danger); }
+
+.main-content {
+  margin-left: 240px; flex: 1;
+  padding: 40px; min-height: 100vh;
+}
+
+[dir="rtl"] .main-content { margin-left: 0; margin-right: 240px; }
+
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 36px;
+}
+
+.page-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 36px; font-weight: 700; color: var(--cream);
+  line-height: 1;
+}
+
+.page-sub { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+
+.topbar-right { display: flex; align-items: center; gap: 12px; }
+
+.date-badge {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px; padding: 8px 14px;
+  font-size: 12px; color: var(--text-muted);
+}
+
+.stats-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 16px; margin-bottom: 24px;
+}
+
+.stat-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px;
+  position: relative; overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.stat-card:hover { border-color: var(--gold); }
+
+.stat-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--gold), transparent);
+}
+
+.stat-num {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 40px; font-weight: 700;
+  color: var(--cream); line-height: 1;
+}
+
+.stat-label { font-size: 11px; color: var(--text-muted); margin-top: 6px; text-transform: uppercase; letter-spacing: 1px; }
+.stat-icon { position: absolute; top: 16px; right: 16px; font-size: 20px; opacity: 0.4; }
+
+.form-row { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 20px; }
+.form-group { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 160px; }
+.form-label { font-size: 11px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+
+input[type="text"], input[type="date"], input[type="number"], input[type="password"], select, textarea {
+  padding: 10px 14px; background: var(--bg2);
+  border: 1px solid var(--border); border-radius: 8px;
+  font-family: 'Outfit', sans-serif; font-size: 13px;
+  color: var(--text); outline: none; width: 100%;
+  transition: border-color 0.2s;
+}
+
+input:focus, select:focus, textarea:focus { border-color: var(--gold); }
+input::placeholder, textarea::placeholder { color: var(--text-dim); }
+select option { background: var(--surface); }
+
+.btn {
+  padding: 10px 20px; border: none; border-radius: 8px;
+  font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 500;
+  cursor: pointer; transition: all 0.2s; white-space: nowrap;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+
+.btn-gold { background: var(--gold); color: #0F0E0C; font-weight: 600; }
+.btn-gold:hover { background: var(--gold2); transform: translateY(-1px); }
+.btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text-muted); }
+.btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
+.btn-danger { background: rgba(196,112,112,0.1); color: var(--danger); border: 1px solid rgba(196,112,112,0.2); font-size: 12px; padding: 6px 12px; }
+.btn-danger:hover { background: var(--danger); color: #fff; }
+.btn-sm { padding: 6px 12px; font-size: 12px; }
+
+.month-nav-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.month-nav-title { font-family: 'Cormorant Garamond', serif; font-size: 22px; color: var(--cream); }
+.month-nav-btns { display: flex; gap: 8px; }
+.month-btn { background: var(--bg2); border: 1px solid var(--border); color: var(--text-muted); border-radius: 8px; width: 32px; height: 32px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+.month-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+.habit-table-wrap { overflow-x: auto; }
+
+table.habit-tbl { width: 100%; border-collapse: collapse; min-width: 800px; }
+table.habit-tbl th { padding: 8px 5px; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-dim); text-align: center; background: var(--bg2); }
+table.habit-tbl th:first-child { text-align: left; padding-left: 14px; min-width: 160px; border-radius: 8px 0 0 8px; }
+table.habit-tbl th:last-child { border-radius: 0 8px 8px 0; }
+table.habit-tbl td { text-align: center; padding: 7px 4px; border-bottom: 1px solid var(--border); }
+table.habit-tbl td:first-child { text-align: left; padding-left: 14px; }
+table.habit-tbl tr:hover td { background: rgba(255,255,255,0.02); }
+table.habit-tbl input[type="checkbox"] { width: 14px; height: 14px; accent-color: var(--gold); cursor: pointer; }
+
+.habit-name-row { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; color: var(--text); }
+.habit-del { background: none; border: none; cursor: pointer; color: var(--text-dim); font-size: 14px; line-height: 1; transition: color 0.2s; }
+.habit-del:hover { color: var(--danger); }
+.habit-total { font-weight: 700; color: var(--gold); font-size: 13px; }
+
+.pbar { height: 3px; background: var(--border); border-radius: 10px; overflow: hidden; width: 50px; display: inline-block; vertical-align: middle; margin-left: 6px; }
+.pbar-fill { height: 100%; background: linear-gradient(90deg, var(--gold), var(--gold2)); border-radius: 10px; }
+
+.task-list { display: flex; flex-direction: column; gap: 8px; }
+
+.task-row {
+  display: grid; grid-template-columns: 24px 1fr 100px 110px 110px 70px;
+  align-items: center; gap: 12px;
+  padding: 13px 16px; background: var(--surface);
+  border: 1px solid var(--border); border-radius: 10px;
+  transition: all 0.2s; font-size: 13px;
+}
+
+.task-row:hover { border-color: var(--border); box-shadow: 0 2px 12px rgba(0,0,0,0.3); transform: translateY(-1px); }
+.task-row.done { opacity: 0.5; }
+.task-row.done .task-name { text-decoration: line-through; color: var(--text-muted); }
+
+.task-cb { width: 16px; height: 16px; accent-color: var(--success); cursor: pointer; }
+.task-name { font-weight: 500; color: var(--text); }
+
+.task-hdr {
+  display: grid; grid-template-columns: 24px 1fr 100px 110px 110px 70px;
+  gap: 12px; padding: 8px 16px; font-size: 10px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 1px; color: var(--text-dim);
+  margin-bottom: 6px;
+}
+
+.badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 500; }
+.b-high { background: rgba(196,112,112,0.15); color: #e09090; }
+.b-mid { background: rgba(201,168,76,0.15); color: var(--gold); }
+.b-low { background: rgba(107,158,120,0.15); color: #8abe9a; }
+.b-done { background: rgba(107,158,120,0.15); color: #8abe9a; }
+.b-inprogress { background: rgba(201,168,76,0.15); color: var(--gold); }
+.b-pending { background: rgba(100,150,200,0.15); color: #90b8e0; }
+.b-cancelled { background: rgba(196,112,112,0.15); color: #e09090; }
+
+.goals-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+
+.goal-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px; position: relative;
+  transition: all 0.2s;
+}
+
+.goal-card:hover { border-color: var(--gold); box-shadow: 0 4px 20px rgba(201,168,76,0.1); }
+.goal-cat { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px; }
+.goal-name { font-family: 'Cormorant Garamond', serif; font-size: 18px; color: var(--cream); margin-bottom: 14px; }
+.goal-pct { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-bottom: 6px; }
+.goal-bar { height: 4px; background: var(--border); border-radius: 10px; overflow: hidden; margin-bottom: 12px; }
+.goal-bar-fill { height: 100%; background: linear-gradient(90deg, var(--gold), var(--gold2)); border-radius: 10px; }
+.goal-deadline { font-size: 11px; color: var(--text-dim); }
+.goal-del { position: absolute; top: 12px; right: 12px; background: none; border: none; cursor: pointer; color: var(--text-dim); font-size: 16px; transition: color 0.2s; }
+.goal-del:hover { color: var(--danger); }
+
+.ai-chat { display: flex; flex-direction: column; height: 500px; }
+.ai-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+.ai-messages::-webkit-scrollbar { width: 4px; }
+.ai-messages::-webkit-scrollbar-track { background: var(--bg2); }
+.ai-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+.msg { display: flex; gap: 10px; max-width: 85%; }
+.msg.user { align-self: flex-end; flex-direction: row-reverse; }
+.msg.ai { align-self: flex-start; }
+
+.msg-avatar {
+  width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 13px;
+}
+
+.msg.ai .msg-avatar { background: rgba(201,168,76,0.15); color: var(--gold); border: 1px solid rgba(201,168,76,0.2); }
+.msg.user .msg-avatar { background: var(--bg2); border: 1px solid var(--border); color: var(--text-muted); }
+
+.msg-bubble {
+  padding: 11px 14px; border-radius: 12px;
+  font-size: 13px; line-height: 1.6; color: var(--text);
+}
+
+.msg.ai .msg-bubble { background: var(--surface2); border: 1px solid var(--border); border-top-left-radius: 4px; }
+.msg.user .msg-bubble { background: rgba(201,168,76,0.1); border: 1px solid rgba(201,168,76,0.2); color: var(--text); border-top-right-radius: 4px; }
+
+.ai-input-row {
+  display: flex; gap: 10px; padding: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.ai-input {
+  flex: 1; padding: 11px 14px; background: var(--bg2);
+  border: 1px solid var(--border); border-radius: 8px;
+  font-family: 'Outfit', sans-serif; font-size: 13px;
+  color: var(--text); outline: none; transition: border-color 0.2s;
+  resize: none;
+}
+
+.ai-input:focus { border-color: var(--gold); }
+
+.ai-send { background: var(--gold); color: #0F0E0C; border: none; border-radius: 8px; padding: 11px 16px; cursor: pointer; font-size: 16px; transition: all 0.2s; }
+.ai-send:hover { background: var(--gold2); }
+.ai-send:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.ai-typing { display: none; align-items: center; gap: 6px; padding: 10px 14px; }
+.ai-typing span { width: 6px; height: 6px; background: var(--gold); border-radius: 50%; animation: typing 1.2s infinite; }
+.ai-typing span:nth-child(2) { animation-delay: 0.2s; }
+.ai-typing span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes typing { 0%,80%,100% { transform: scale(0.6); opacity: 0.4; } 40% { transform: scale(1); opacity: 1; } }
+
+.quick-prompts { display: flex; gap: 8px; flex-wrap: wrap; padding: 0 16px 12px; }
+.qp-btn { background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; padding: 6px 12px; font-size: 12px; color: var(--text-muted); cursor: pointer; transition: all 0.2s; font-family: 'Outfit', sans-serif; }
+.qp-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+.setting-section { font-size: 13px; font-weight: 600; color: var(--cream); margin-bottom: 16px; }
+.setting-label { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 8px; display: block; }
+
+.color-swatches { display: flex; gap: 8px; }
+.cswatch { width: 28px; height: 28px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
+.cswatch.active { border-color: var(--cream); transform: scale(1.15); }
+
+.empty { text-align: center; padding: 50px 20px; color: var(--text-dim); }
+.empty-icon { font-size: 36px; margin-bottom: 12px; opacity: 0.5; }
+.empty-text { font-size: 13px; }
+
+.toast {
+  position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; padding: 12px 18px;
+  font-size: 13px; color: var(--text);
+  box-shadow: var(--shadow);
+  opacity: 0; transform: translateY(10px);
+  transition: all 0.3s; pointer-events: none;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+
+.emoji-row { display: flex; gap: 6px; flex-wrap: wrap; }
+.emoji-opt { background: var(--bg2); border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px; cursor: pointer; font-size: 15px; transition: all 0.15s; }
+.emoji-opt:hover, .emoji-opt.sel { background: rgba(201,168,76,0.15); border-color: var(--gold); }
+
+.mobile-header { display: none; }
+
+@media (max-width: 768px) {
+  .sidebar { transform: translateX(-100%); }
+  [dir="rtl"] .sidebar { transform: translateX(100%); }
+  .sidebar.open { transform: translateX(0); }
+  .main-content { margin-left: 0; margin-right: 0; padding: 16px; }
+  .mobile-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; background: var(--surface); border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+  .hamburger { background: none; border: none; color: var(--text); font-size: 20px; cursor: pointer; }
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+  .task-row { grid-template-columns: 24px 1fr 80px; }
+  .task-row > *:nth-child(n+4) { display: none; }
+  .task-hdr { display: none; }
+  .settings-grid { grid-template-columns: 1fr; }
+  .goal-form-row { grid-template-columns: 1fr; }
+  .form-row { flex-direction: column; }
+}
+
+.section { display: none; }
+.section.active { display: block; }
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+.section.active { animation: fadeUp 0.3s ease; }
+
+/* shake animation for wrong key */
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  20% { transform: translateX(-8px); }
+  40% { transform: translateX(8px); }
+  60% { transform: translateX(-6px); }
+  80% { transform: translateX(6px); }
+}
+.shake { animation: shake 0.4s ease; }
+
+/* ══════════════════════════════════════════════
+   ✦ EPIC MOTION SYSTEM — PeakPlan Premium FX ✦
+══════════════════════════════════════════════ */
+
+
+
+/* ── Global Smooth transitions ── */
+.nav-item, .stat-card, .card, .goal-card, .btn, .task-row, .qp-btn, .emoji-opt, .cswatch {
+  will-change: transform;
+}
+
+/* ── Section page transitions ── */
+.section { display: none; opacity: 0; transform: translateY(18px) scale(0.993); }
+.section.active {
+  display: block;
+  animation: ppPageIn 0.55s cubic-bezier(.16,1,.3,1) forwards;
+}
+@keyframes ppPageIn {
+  from { opacity: 0; transform: translateY(18px) scale(0.993); filter: blur(2px); }
+  to   { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+
+/* ── Staggered card children ── */
+.section.active .stat-card { opacity: 0; animation: ppCardUp 0.5s cubic-bezier(.16,1,.3,1) forwards; }
+.section.active .stat-card:nth-child(1) { animation-delay: 0.06s; }
+.section.active .stat-card:nth-child(2) { animation-delay: 0.13s; }
+.section.active .stat-card:nth-child(3) { animation-delay: 0.20s; }
+.section.active .stat-card:nth-child(4) { animation-delay: 0.27s; }
+@keyframes ppCardUp {
+  from { opacity: 0; transform: translateY(22px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ── Stat number count animation ── */
+.stat-num { transition: color 0.4s; }
+
+/* ── Card hover — lift + glow ── */
+.card {
+  transition: box-shadow 0.35s cubic-bezier(.16,1,.3,1), border-color 0.25s, transform 0.35s cubic-bezier(.16,1,.3,1);
+}
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.55), 0 0 0 1px rgba(212,175,85,0.1);
+}
+
+/* ── Stat card tilt effect ── */
+.stat-card {
+  transition: all 0.35s cubic-bezier(.16,1,.3,1);
+  transform-style: preserve-3d;
+}
+.stat-card:hover {
+  transform: perspective(600px) rotateX(-4deg) translateY(-4px) scale(1.025);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.6), 0 0 20px rgba(212,175,85,0.12);
+}
+
+/* ── Gold shimmer on stat-card top line ── */
+.stat-card::before {
+  background: linear-gradient(90deg, transparent, var(--gold), var(--gold2), transparent);
+  background-size: 200% 100%;
+  animation: ppShimmer 3s ease-in-out infinite;
+}
+@keyframes ppShimmer {
+  0%   { background-position: -200% 0; opacity: 0.6; }
+  50%  { background-position: 200% 0; opacity: 1; }
+  100% { background-position: -200% 0; opacity: 0.6; }
+}
+
+/* ── Nav item hover morphing ── */
+.nav-item {
+  transition: background 0.22s, color 0.22s, transform 0.22s cubic-bezier(.16,1,.3,1), box-shadow 0.22s;
+  position: relative; overflow: hidden;
+}
+.nav-item::after {
+  content: '';
+  position: absolute; left: 0; top: 0; bottom: 0;
+  width: 2.5px;
+  background: linear-gradient(180deg, var(--gold2), var(--gold));
+  transform: scaleY(0); transform-origin: bottom;
+  transition: transform 0.28s cubic-bezier(.16,1,.3,1);
+  border-radius: 0 2px 2px 0;
+}
+.nav-item.active::after { transform: scaleY(1); }
+.nav-item:hover { transform: translateX(3px); }
+.nav-item.active { transform: translateX(4px); }
+
+/* ── Nav item icon pop ── */
+.nav-item .nav-icon {
+  display: inline-block;
+  transition: transform 0.28s cubic-bezier(.16,1,.3,1);
+}
+.nav-item:hover .nav-icon, .nav-item.active .nav-icon {
+  transform: scale(1.3) rotate(-5deg);
+}
+
+/* ── Button press physics ── */
+.btn {
+  transition: all 0.22s cubic-bezier(.16,1,.3,1);
+  position: relative; overflow: hidden;
+}
+.btn::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(circle at center, rgba(255,255,255,0.25) 0%, transparent 70%);
+  opacity: 0; transform: scale(0);
+  transition: transform 0.4s, opacity 0.4s;
+}
+.btn:active::after { transform: scale(2.5); opacity: 1; transition: 0s; }
+.btn-gold:hover { transform: translateY(-2px) scale(1.03); box-shadow: 0 8px 24px rgba(212,175,85,0.35); }
+.btn-gold:active { transform: scale(0.97); }
+
+/* ── Goal card entrance ── */
+.goal-card {
+  transition: all 0.32s cubic-bezier(.16,1,.3,1);
+  transform-origin: center bottom;
+}
+.goal-card:hover {
+  transform: translateY(-5px) scale(1.015);
+  box-shadow: 0 18px 48px rgba(0,0,0,0.5), 0 0 24px rgba(212,175,85,0.12);
+}
+
+/* ── Goal bar fill animated ── */
+.goal-bar-fill {
+  transition: width 1.2s cubic-bezier(.16,1,.3,1);
+  position: relative; overflow: hidden;
+}
+.goal-bar-fill::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%);
+  animation: ppBarShine 2s ease-in-out infinite;
+}
+@keyframes ppBarShine {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(300%); }
+}
+
+/* ── Task row entrance ── */
+.task-row {
+  transition: all 0.28s cubic-bezier(.16,1,.3,1);
+  animation: ppSlideIn 0.4s cubic-bezier(.16,1,.3,1) both;
+}
+@keyframes ppSlideIn {
+  from { opacity: 0; transform: translateX(-12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.task-row:hover {
+  transform: translateX(4px) scale(1.008);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  border-color: rgba(212,175,85,0.3) !important;
+}
+
+/* ── Input focus glow ── */
+input[type="text"]:focus, input[type="date"]:focus,
+input[type="number"]:focus, input[type="password"]:focus,
+select:focus, textarea:focus {
+  box-shadow: 0 0 0 3px rgba(212,175,85,0.15), 0 0 20px rgba(212,175,85,0.08);
+  transition: border-color 0.2s, box-shadow 0.3s;
+}
+
+/* ── License input glow ── */
+.license-input:focus {
+  box-shadow: 0 0 0 3px rgba(212,175,85,0.2), 0 0 30px rgba(212,175,85,0.1);
+}
+.license-btn {
+  position: relative; overflow: hidden;
+  transition: all 0.25s cubic-bezier(.16,1,.3,1);
+}
+.license-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(212,175,85,0.4);
+}
+.license-btn::before {
+  content: '';
+  position: absolute; top: 0; left: -100%; width: 60%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  transition: left 0.5s;
+}
+.license-btn:hover::before { left: 150%; }
+
+/* ── Sidebar logo shimmer ── */
+.sidebar-logo-text span {
+  background: linear-gradient(120deg, var(--gold) 0%, var(--gold2) 35%, #fff8d0 50%, var(--gold2) 65%, var(--gold) 100%);
+  background-size: 250% 100%;
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  animation: ppLogoShimmer 3.5s linear infinite;
+}
+@keyframes ppLogoShimmer {
+  0%   { background-position: 0% 0%; }
+  100% { background-position: -250% 0%; }
+}
+
+/* ── Page title reveal ── */
+.page-title {
+  display: inline-block;
+  background: linear-gradient(120deg, var(--cream) 0%, #fff8e8 40%, var(--cream) 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  animation: ppTitleShimmer 4s ease-in-out infinite;
+}
+@keyframes ppTitleShimmer {
+  0%, 100% { background-position: 0% 0%; }
+  50%       { background-position: 100% 0%; }
+}
+
+/* ── Toast entrance ── */
+.toast.show {
+  animation: ppToastPop 0.4s cubic-bezier(.16,1,.3,1) forwards;
+}
+@keyframes ppToastPop {
+  from { opacity: 0; transform: translateY(16px) scale(0.94); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.toast {
+  background: linear-gradient(135deg, var(--surface), var(--surface2)) !important;
+  border-color: rgba(212,175,85,0.3) !important;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(212,175,85,0.15) !important;
+}
+
+/* ── Emoji opt pop ── */
+.emoji-opt {
+  transition: all 0.2s cubic-bezier(.16,1,.3,1);
+}
+.emoji-opt:hover { transform: scale(1.3) rotate(-5deg); border-color: var(--gold); }
+.emoji-opt.sel { transform: scale(1.15); }
+
+/* ── Color swatch hover ── */
+.cswatch {
+  transition: all 0.25s cubic-bezier(.16,1,.3,1);
+}
+.cswatch:hover { transform: scale(1.3) translateY(-3px); box-shadow: 0 6px 18px rgba(0,0,0,0.5); }
+
+/* ── Quick prompt buttons ── */
+.qp-btn {
+  transition: all 0.22s cubic-bezier(.16,1,.3,1);
+}
+.qp-btn:hover {
+  transform: translateY(-2px) scale(1.04);
+  border-color: var(--gold);
+  color: var(--gold);
+  box-shadow: 0 4px 16px rgba(212,175,85,0.18);
+}
+
+/* ── AI message entrance ── */
+.msg { animation: ppMsgIn 0.4s cubic-bezier(.16,1,.3,1) both; }
+@keyframes ppMsgIn {
+  from { opacity: 0; transform: translateY(10px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ── AI typing dots upgraded ── */
+.ai-typing span {
+  animation: ppTyping 1.0s cubic-bezier(.36,0,.64,1) infinite;
+}
+.ai-typing span:nth-child(2) { animation-delay: 0.18s; }
+.ai-typing span:nth-child(3) { animation-delay: 0.36s; }
+@keyframes ppTyping {
+  0%, 80%, 100% { transform: translateY(0) scale(0.7); opacity: 0.35; }
+  40%            { transform: translateY(-7px) scale(1.1); opacity: 1; box-shadow: 0 4px 12px rgba(212,175,85,0.5); }
+}
+
+/* ── Scroll progress bar ── */
+#pp-progress {
+  position: fixed; top: 0; left: 0; height: 2px; z-index: 99990;
+  background: linear-gradient(90deg, var(--gold), var(--gold2));
+  width: 0%; transition: width 0.1s linear;
+  box-shadow: 0 0 8px var(--gold2);
+}
+
+/* ── Floating orbs background ── */
+#pp-orbs { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.pp-orb {
+  position: absolute; border-radius: 50%;
+  background: radial-gradient(circle, rgba(212,175,85,0.07) 0%, transparent 70%);
+  animation: ppOrbFloat linear infinite;
+  will-change: transform;
+}
+@keyframes ppOrbFloat {
+  from { transform: translateY(0px) rotate(0deg); }
+  to   { transform: translateY(-120px) rotate(360deg); }
+}
+
+/* ── Sidebar entrance ── */
+.sidebar {
+  animation: ppSidebarIn 0.7s cubic-bezier(.16,1,.3,1) both;
+}
+@keyframes ppSidebarIn {
+  from { transform: translateX(-100%); opacity: 0; }
+  to   { transform: translateX(0); opacity: 1; }
+}
+
+/* ── Main content entrance ── */
+.main-content {
+  animation: ppMainIn 0.7s cubic-bezier(.16,1,.3,1) 0.15s both;
+}
+@keyframes ppMainIn {
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ── Habit checkbox pulse on check ── */
+table.habit-tbl input[type="checkbox"]:checked {
+  animation: ppCheckPop 0.3s cubic-bezier(.16,1,.3,1);
+}
+@keyframes ppCheckPop {
+  0%   { transform: scale(0.6); }
+  60%  { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
+
+/* ── Month nav btn ── */
+.month-btn {
+  transition: all 0.2s cubic-bezier(.16,1,.3,1);
+}
+.month-btn:hover {
+  transform: scale(1.2);
+  border-color: var(--gold);
+  color: var(--gold);
+  box-shadow: 0 0 14px rgba(212,175,85,0.3);
+}
+
+/* ── Mobile header ── */
+.mobile-header {
+  animation: ppFadeDown 0.5s cubic-bezier(.16,1,.3,1) both;
+}
+@keyframes ppFadeDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Stat counter glow ── */
+@keyframes ppNumGlow {
+  from { text-shadow: 0 0 0 rgba(212,175,85,0); }
+  50%  { text-shadow: 0 0 20px rgba(212,175,85,0.6); }
+  to   { text-shadow: 0 0 0 rgba(212,175,85,0); }
+}
+.stat-num.counting { animation: ppNumGlow 0.8s ease; }
+
+/* ── Page title underline morph ── */
+.topbar {
+  position: relative;
+}
+.topbar::after {
+  content: '';
+  position: absolute; bottom: -8px; left: 0;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(212,175,85,0.4), transparent);
+  animation: ppTopbarLine 0.8s cubic-bezier(.16,1,.3,1) both;
+}
+@keyframes ppTopbarLine {
+  from { width: 0; opacity: 0; }
+  to   { width: 40%; opacity: 1; }
+}
+
+/* ── Logo text in mobile ── */
+.mobile-header span[style*="color:var(--gold)"] {
+  background: linear-gradient(120deg, var(--gold) 0%, var(--gold2) 50%, var(--gold) 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  animation: ppLogoShimmer 3.5s linear infinite;
+}
+
+
+/* ══════════════════════════════════════════════
+   ✦ ULTRA PREMIUM FX v2 — PeakPlan ✦
+══════════════════════════════════════════════ */
+
+/* ── Ripple on nav click ── */
+@keyframes ppRipple {
+  from { transform: scale(0); opacity: 0.5; }
+  to   { transform: scale(3); opacity: 0; }
+}
+.nav-item .pp-ripple {
+  position: absolute; border-radius: 50%;
+  width: 40px; height: 40px;
+  background: rgba(212,175,85,0.35);
+  pointer-events: none;
+  animation: ppRipple 0.55s ease-out forwards;
+  transform-origin: center;
+}
+
+/* ── Aurora Background ── */
+#pp-aurora {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
+}
+.aurora-band {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  mix-blend-mode: screen;
+  animation: auroraDrift linear infinite;
+  will-change: transform, opacity;
+}
+@keyframes auroraDrift {
+  0%   { transform: translateX(0) translateY(0) rotate(0deg) scale(1); opacity: 0.45; }
+  25%  { transform: translateX(8%) translateY(-4%) rotate(15deg) scale(1.08); opacity: 0.6; }
+  50%  { transform: translateX(-5%) translateY(6%) rotate(-10deg) scale(0.95); opacity: 0.4; }
+  75%  { transform: translateX(4%) translateY(-3%) rotate(20deg) scale(1.05); opacity: 0.55; }
+  100% { transform: translateX(0) translateY(0) rotate(0deg) scale(1); opacity: 0.45; }
+}
+
+/* ── Stardust particles canvas ── */
+#pp-stardust { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+
+/* ── Glitch effect on logo hover ── */
+.sidebar-logo-text:hover { animation: ppGlitch 0.4s steps(2) both; cursor: default; }
+@keyframes ppGlitch {
+  0%   { text-shadow: none; transform: none; }
+  20%  { text-shadow: -3px 0 rgba(0,255,255,0.6), 3px 0 rgba(255,0,128,0.5); transform: translate(2px,0) skew(-1deg); }
+  40%  { text-shadow: 3px 0 rgba(0,255,255,0.4), -3px 0 rgba(255,0,128,0.4); transform: translate(-1px,0) skew(1deg); }
+  60%  { text-shadow: -2px 0 rgba(0,255,255,0.5), 2px 0 rgba(255,0,128,0.5); transform: translate(1px,0); }
+  80%  { text-shadow: none; transform: translate(-1px,0); }
+  100% { text-shadow: none; transform: none; }
+}
+
+/* ── Magnetic hover halo on stat cards ── */
+.stat-card::after {
+  content: '';
+  position: absolute; inset: 0; border-radius: inherit;
+  background: radial-gradient(circle at var(--mx,50%) var(--my,50%), rgba(212,175,85,0.12) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+.stat-card:hover::after { opacity: 1; }
+
+/* ── Neon border pulse on active nav ── */
+.nav-item.active {
+  box-shadow: inset 0 0 20px rgba(212,175,85,0.05), 0 0 0 1px rgba(212,175,85,0.15);
+}
+@keyframes ppNeonPulse {
+  0%, 100% { box-shadow: inset 0 0 20px rgba(212,175,85,0.05), 0 0 0 1px rgba(212,175,85,0.15); }
+  50%       { box-shadow: inset 0 0 30px rgba(212,175,85,0.12), 0 0 0 1px rgba(212,175,85,0.35), 0 0 18px rgba(212,175,85,0.08); }
+}
+.nav-item.active { animation: ppNeonPulse 2.8s ease-in-out infinite; }
+
+/* ── Liquid morph on cards ── */
+@keyframes ppLiquidBorder {
+  0%, 100% { border-radius: 14px; }
+  33%       { border-radius: 18px 10px 16px 12px; }
+  66%       { border-radius: 10px 18px 12px 16px; }
+}
+
+/* ── Page transition - cinematic wipe ── */
+@keyframes ppPageIn {
+  0%   { opacity: 0; transform: translateY(28px) scale(0.988); filter: blur(4px) brightness(0.8); }
+  60%  { filter: blur(0px) brightness(1); }
+  100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0) brightness(1); }
+}
+
+/* ── Gold dust trail on buttons ── */
+.btn-gold {
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold2) 40%, var(--gold) 100%);
+  background-size: 200% 200%;
+  animation: ppBtnGradShift 4s ease infinite;
+}
+@keyframes ppBtnGradShift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ── Sidebar gradient accent line ── */
+.sidebar::after {
+  content: '';
+  position: absolute; top: 0; right: 0; bottom: 0;
+  width: 1px;
+  background: linear-gradient(180deg, transparent 0%, rgba(212,175,85,0.4) 30%, rgba(212,175,85,0.6) 60%, rgba(212,175,85,0.2) 85%, transparent 100%);
+  animation: ppSideLineShimmer 4s ease-in-out infinite;
+}
+[dir="rtl"] .sidebar::after { right: auto; left: 0; }
+@keyframes ppSideLineShimmer {
+  0%, 100% { opacity: 0.5; }
+  50%       { opacity: 1; }
+}
+
+/* ── Stat card ambient glow layer ── */
+.stat-card {
+  background: linear-gradient(145deg, var(--surface) 0%, rgba(30,28,24,0.95) 100%);
+}
+.stat-card:hover {
+  background: linear-gradient(145deg, var(--surface2) 0%, var(--surface) 100%);
+}
+
+/* ── Floating micro-particles on hover (CSS) ── */
+@keyframes ppMicroFloat {
+  0%   { transform: translateY(0) translateX(0) scale(1); opacity: 0.8; }
+  50%  { transform: translateY(-30px) translateX(8px) scale(1.3); opacity: 0.5; }
+  100% { transform: translateY(-60px) translateX(-4px) scale(0); opacity: 0; }
+}
+
+/* ── Goal card shimmer overlay ── */
+.goal-card::before {
+  content: '';
+  position: absolute; inset: 0; border-radius: inherit;
+  background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, transparent 50%, rgba(212,175,85,0.04) 100%);
+  pointer-events: none;
+  transition: opacity 0.4s;
+  opacity: 0;
+}
+.goal-card:hover::before { opacity: 1; }
+
+/* ── Card glass morphism enhancement ── */
+.card {
+  background: linear-gradient(145deg, var(--surface) 0%, rgba(26,23,20,0.98) 100%);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(50,44,34,0.6);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+/* ── Text shimmer on page titles ── */
+@keyframes ppTitleShimmer {
+  0%, 100% { background-position: 0% 0%; filter: brightness(1); }
+  50%       { background-position: 100% 0%; filter: brightness(1.15); }
+}
+
+/* ── Sparkle keyframe for JS particles ── */
+@keyframes ppSparkle {
+  0%   { transform: scale(0) rotate(0deg); opacity: 1; }
+  50%  { transform: scale(1.5) rotate(180deg); opacity: 0.8; }
+  100% { transform: scale(0) rotate(360deg); opacity: 0; }
+}
+
+/* ── Scan line effect on hover over sections ── */
+.section.active::before {
+  content: '';
+  position: fixed; top: 0; left: 240px; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(212,175,85,0.4), transparent);
+  animation: ppScanLine 3s ease-in-out infinite;
+  pointer-events: none; z-index: 1;
+}
+[dir="rtl"] .section.active::before { left: 0; right: 240px; }
+@keyframes ppScanLine {
+  from { top: 0; opacity: 1; }
+  to   { top: 100vh; opacity: 0; }
+}
+
+/* ── Input ripple on focus ── */
+input[type="text"]:focus, input[type="date"]:focus,
+input[type="number"]:focus, input[type="password"]:focus,
+select:focus, textarea:focus {
+  animation: ppInputPop 0.25s cubic-bezier(.16,1,.3,1);
+}
+@keyframes ppInputPop {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.008); }
+  100% { transform: scale(1); }
+}
+
+/* ── Sidebar user avatar rotating ring ── */
+.user-avatar {
+  position: relative;
+}
+.user-avatar::after {
+  content: '';
+  position: absolute; inset: -3px;
+  border-radius: 50%;
+  background: conic-gradient(var(--gold), var(--gold2), transparent, transparent, var(--gold));
+  z-index: -1;
+  animation: ppAvatarSpin 4s linear infinite;
+}
+@keyframes ppAvatarSpin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* ── Badge glow ── */
+.b-high { animation: ppBadgeGlow 2s ease-in-out infinite; }
+@keyframes ppBadgeGlow {
+  0%, 100% { box-shadow: none; }
+  50%       { box-shadow: 0 0 8px rgba(196,112,112,0.3); }
+}
+
+/* ── Date badge pulse ── */
+.date-badge {
+  animation: ppDatePulse 5s ease-in-out infinite;
+}
+@keyframes ppDatePulse {
+  0%, 100% { border-color: var(--border); }
+  50%       { border-color: rgba(212,175,85,0.3); box-shadow: 0 0 10px rgba(212,175,85,0.08); }
+}
+
+</style>
+
+
+<div id="pp-progress"></div>
+<div id="pp-aurora"></div>
+<canvas id="pp-stardust"></canvas>
+
+<!-- ══ CINEMATIC INTRO ══ -->
+<div id="introScreen">
+  <div class="intro-rays"></div>
+  <div class="intro-particles">
+    <span style="left:15%; animation-delay:0s"></span>
+    <span style="left:30%; animation-delay:0.6s"></span>
+    <span style="left:48%; animation-delay:1.2s"></span>
+    <span style="left:62%; animation-delay:0.3s"></span>
+    <span style="left:78%; animation-delay:0.9s"></span>
+    <span style="left:88%; animation-delay:1.5s"></span>
+    <span style="left:55%; animation-delay:1.8s"></span>
+    <span style="left:22%; animation-delay:2.1s"></span>
+  </div>
+  <div class="intro-content">
+    <div class="intro-logo">Peak<span>Plan</span></div>
+    <div class="intro-line"></div>
+    <div class="intro-sub">Productivity Suite</div>
+  </div>
+</div>
+
+<!-- ══ APP ══ -->
+<div id="app">
+  <div class="layout">
+
+    <!-- SIDEBAR -->
+    <div class="sidebar" id="sidebar">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-text">Peak<span>Plan</span></div>
+      </div>
+      <div class="sidebar-user">
+        <div class="user-avatar" id="userAvatar">U</div>
+        <div>
+          <div class="user-name" id="userName">User</div>
+          <div class="user-plan">✦ Pro</div>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-section" id="nav-main-label">Main</div>
+        <div class="nav-item active" onclick="switchPage('dashboard', this)">
+          <span class="nav-icon">⌂</span><span id="nav-dashboard">Dashboard</span>
+        </div>
+        <div class="nav-item" onclick="switchPage('habits', this)">
+          <span class="nav-icon">◉</span><span id="nav-habits">Habits</span>
+        </div>
+        <div class="nav-item" onclick="switchPage('tasks', this)">
+          <span class="nav-icon">✓</span><span id="nav-tasks">Tasks</span>
+        </div>
+        <div class="nav-item" onclick="switchPage('goals', this)">
+          <span class="nav-icon">◎</span><span id="nav-goals">Goals</span>
+        </div>
+        <div class="nav-section" id="nav-tools-label">Tools</div>
+        <div class="nav-item" onclick="switchPage('ai', this)">
+          <span class="nav-icon">✦</span><span id="nav-ai">AI Coach</span>
+        </div>
+        <div class="nav-item" onclick="switchPage('settings', this)">
+          <span class="nav-icon">⚙</span><span id="nav-settings">Settings</span>
+        </div>
+      </nav>
+      <div class="sidebar-bottom">
+        <select class="lang-select" onchange="setLang(this.value)">
+          <option value="en">🌐 English</option>
+          <option value="ar">🌐 العربية</option>
+          <option value="es">🌐 Español</option>
+          <option value="fr">🌐 Français</option>
+          <option value="tr">🌐 Türkçe</option>
+        </select>
+
+      </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main-content">
+
+      <div class="mobile-header">
+        <button class="hamburger" onclick="toggleSidebar()">☰</button>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--cream)">Peak<span style="color:var(--gold)">Plan</span></div>
+        <div style="width:32px"></div>
+      </div>
+
+      <!-- DASHBOARD -->
+      <div class="section active" id="sec-dashboard">
+        <div class="topbar">
+          <div>
+            <div class="page-title" id="dash-title">Good morning ✦</div>
+            <div class="page-sub" id="dash-sub">Here's your productivity overview</div>
+          </div>
+          <div class="topbar-right">
+            <div class="date-badge" id="topDate"></div>
+          </div>
+        </div>
+        <div class="stats-grid" id="dashStats">
+          <div class="stat-card"><div class="stat-icon">◉</div><div class="stat-num" id="ds-habits">0</div><div class="stat-label" id="ds-habits-l">Active Habits</div></div>
+          <div class="stat-card"><div class="stat-icon">✓</div><div class="stat-num" id="ds-tasks">0</div><div class="stat-label" id="ds-tasks-l">Tasks Done</div></div>
+          <div class="stat-card"><div class="stat-icon">◎</div><div class="stat-num" id="ds-goals">0</div><div class="stat-label" id="ds-goals-l">Active Goals</div></div>
+          <div class="stat-card"><div class="stat-icon">%</div><div class="stat-num" id="ds-streak">0%</div><div class="stat-label" id="ds-streak-l">Completion Rate</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+          <div class="card">
+            <div class="card-title" id="dash-upcoming">Upcoming Tasks</div>
+            <div id="dashTasks"></div>
+          </div>
+          <div class="card">
+            <div class="card-title" id="dash-today-habits">Today's Habits</div>
+            <div id="dashHabits"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- HABITS -->
+      <div class="section" id="sec-habits">
+        <div class="topbar">
+          <div>
+            <div class="page-title" id="habits-title">Habit Tracker</div>
+            <div class="page-sub" id="habits-sub">Build consistency day by day</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title" id="add-habit-label">New Habit</div>
+          <div class="form-row">
+            <div class="form-group" style="flex:2">
+              <label class="form-label" id="habit-name-label">Habit Name</label>
+              <input type="text" id="newHabitName" placeholder="e.g. Morning run...">
+            </div>
+            <div class="form-group" style="flex:0;min-width:200px">
+              <label class="form-label" id="habit-icon-label">Icon</label>
+              <div class="emoji-row">
+                <span class="emoji-opt sel" data-e="⭐" onclick="selEmoji(this)">⭐</span>
+                <span class="emoji-opt" data-e="💪" onclick="selEmoji(this)">💪</span>
+                <span class="emoji-opt" data-e="📖" onclick="selEmoji(this)">📖</span>
+                <span class="emoji-opt" data-e="💧" onclick="selEmoji(this)">💧</span>
+                <span class="emoji-opt" data-e="🧘" onclick="selEmoji(this)">🧘</span>
+                <span class="emoji-opt" data-e="🏃" onclick="selEmoji(this)">🏃</span>
+                <span class="emoji-opt" data-e="🌿" onclick="selEmoji(this)">🌿</span>
+                <span class="emoji-opt" data-e="✍️" onclick="selEmoji(this)">✍️</span>
+                <span class="emoji-opt" data-e="🍎" onclick="selEmoji(this)">🍎</span>
+                <span class="emoji-opt" data-e="😴" onclick="selEmoji(this)">😴</span>
+              </div>
+            </div>
+            <div class="form-group" style="flex:0;min-width:120px">
+              <label class="form-label">&nbsp;</label>
+              <button class="btn btn-gold" onclick="addHabit()" id="add-habit-btn">+ Add</button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="month-nav-bar">
+            <div class="month-nav-title" id="monthTitle"></div>
+            <div class="month-nav-btns">
+              <button class="month-btn" onclick="changeMonth(-1)">‹</button>
+              <button class="month-btn" onclick="changeMonth(1)">›</button>
+            </div>
+          </div>
+          <div class="habit-table-wrap">
+            <table class="habit-tbl" id="habitGrid">
+              <thead id="habitHead"></thead>
+              <tbody id="habitBody"></tbody>
+            </table>
+          </div>
+          <div class="empty" id="habitEmpty" style="display:none">
+            <div class="empty-icon">🌱</div>
+            <div class="empty-text" id="no-habits-text">No habits yet. Add your first one!</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TASKS -->
+      <div class="section" id="sec-tasks">
+        <div class="topbar">
+          <div>
+            <div class="page-title" id="tasks-title">Task Manager</div>
+            <div class="page-sub" id="tasks-sub">Organize and conquer your to-do list</div>
+          </div>
+        </div>
+        <div class="stats-grid" style="grid-template-columns:repeat(4,1fr)">
+          <div class="stat-card"><div class="stat-icon">Σ</div><div class="stat-num" id="st-total">0</div><div class="stat-label" id="st-total-l">Total</div></div>
+          <div class="stat-card"><div class="stat-icon">✓</div><div class="stat-num" id="st-done">0</div><div class="stat-label" id="st-done-l">Done</div></div>
+          <div class="stat-card"><div class="stat-icon">⏳</div><div class="stat-num" id="st-prog">0</div><div class="stat-label" id="st-prog-l">In Progress</div></div>
+          <div class="stat-card"><div class="stat-icon">📌</div><div class="stat-num" id="st-pend">0</div><div class="stat-label" id="st-pend-l">Pending</div></div>
+        </div>
+        <div class="card">
+          <div class="card-title" id="add-task-label">New Task</div>
+          <div class="form-row">
+            <div class="form-group" style="flex:3"><label class="form-label" id="task-name-l">Task</label><input type="text" id="taskName" placeholder="What needs to be done?"></div>
+            <div class="form-group"><label class="form-label" id="task-pri-l">Priority</label><select id="taskPri"><option value="high" id="pri-high">🔴 High</option><option value="mid" selected id="pri-mid">🟡 Medium</option><option value="low" id="pri-low">🟢 Low</option></select></div>
+            <div class="form-group"><label class="form-label" id="task-date-l">Due Date</label><input type="date" id="taskDate"></div>
+            <div class="form-group"><label class="form-label" id="task-status-l">Status</label><select id="taskStatus"><option value="inprogress" id="s-inprog">⏳ In Progress</option><option value="pending" id="s-pend">📌 Pending</option><option value="done" id="s-done">✅ Done</option><option value="cancelled" id="s-cancel">❌ Cancelled</option></select></div>
+            <div class="form-group" style="flex:0;min-width:80px"><label class="form-label">&nbsp;</label><button class="btn btn-gold" onclick="addTask()" id="add-task-btn">+ Add</button></div>
+          </div>
+          <div class="task-hdr" id="taskHdr">
+            <span></span><span id="th-task">Task</span><span id="th-pri">Priority</span><span id="th-date">Due</span><span id="th-status">Status</span><span id="th-del">Delete</span>
+          </div>
+          <div class="task-list" id="taskList"></div>
+          <div class="empty" id="taskEmpty" style="display:none"><div class="empty-icon">📝</div><div class="empty-text" id="no-tasks-text">No tasks yet!</div></div>
+        </div>
+      </div>
+
+      <!-- GOALS -->
+      <div class="section" id="sec-goals">
+        <div class="topbar">
+          <div>
+            <div class="page-title" id="goals-title">Goals</div>
+            <div class="page-sub" id="goals-sub">Set milestones, track your journey</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title" id="add-goal-label">New Goal</div>
+          <div class="form-row goal-form-row">
+            <div class="form-group" style="flex:3"><label class="form-label" id="goal-name-l">Goal</label><input type="text" id="goalName" placeholder="e.g. Run 5km every week"></div>
+            <div class="form-group"><label class="form-label" id="goal-cat-l">Category</label><select id="goalCat"><option id="gc-health">Health</option><option id="gc-finance">Finance</option><option id="gc-learn">Learning</option><option id="gc-career">Career</option><option id="gc-personal">Personal</option><option id="gc-other">Other</option></select></div>
+            <div class="form-group" style="flex:0;min-width:100px"><label class="form-label" id="goal-pct-l">Progress %</label><input type="number" id="goalPct" placeholder="0" min="0" max="100"></div>
+            <div class="form-group" style="flex:0;min-width:130px"><label class="form-label" id="goal-dl-l">Deadline</label><input type="date" id="goalDL"></div>
+            <div class="form-group" style="flex:0;min-width:80px"><label class="form-label">&nbsp;</label><button class="btn btn-gold" onclick="addGoal()" id="add-goal-btn">+ Add</button></div>
+          </div>
+        </div>
+        <div class="goals-grid" id="goalsGrid"></div>
+        <div class="empty" id="goalEmpty"><div class="empty-icon">🎯</div><div class="empty-text" id="no-goals-text">No goals yet. Dream big!</div></div>
+      </div>
+
+      <!-- AI COACH -->
+      <div class="section" id="sec-ai">
+        <div class="topbar">
+          <div>
+            <div class="page-title" id="ai-title">AI Coach ✦</div>
+            <div class="page-sub" id="ai-sub">Your personal productivity assistant</div>
+          </div>
+        </div>
+        <div class="card" style="padding:0;overflow:hidden">
+          <div class="quick-prompts" style="padding:16px 16px 0">
+            <button class="qp-btn" onclick="quickPrompt(this)" id="qp1">💡 Analyze my habits</button>
+            <button class="qp-btn" onclick="quickPrompt(this)" id="qp2">📋 Suggest tasks for today</button>
+            <button class="qp-btn" onclick="quickPrompt(this)" id="qp3">🎯 Help me set a goal</button>
+            <button class="qp-btn" onclick="quickPrompt(this)" id="qp4">⚡ How to be more productive?</button>
+          </div>
+          <div class="ai-chat">
+            <div class="ai-messages" id="aiMessages">
+              <div class="msg ai">
+                <div class="msg-avatar">✦</div>
+                <div class="msg-bubble" id="ai-welcome">Hi! I'm your PeakPlan AI Coach. I can analyze your habits, suggest tasks, help you set goals, and give you personalized productivity advice. How can I help you today?</div>
+              </div>
+            </div>
+            <div class="ai-typing" id="aiTyping">
+              <div class="msg-avatar" style="width:30px;height:30px;border-radius:50%;background:rgba(201,168,76,0.15);color:var(--gold);border:1px solid rgba(201,168,76,0.2);display:flex;align-items:center;justify-content:center;font-size:13px;">✦</div>
+              <span></span><span></span><span></span>
+            </div>
+            <div class="ai-input-row">
+              <textarea class="ai-input" id="aiInput" placeholder="Ask your AI Coach anything..." rows="1"></textarea>
+              <button class="ai-send" id="aiSendBtn" onclick="sendAI()">➤</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div class="section" id="sec-settings">
+        <div class="topbar">
+          <div>
+            <div class="page-title" id="settings-title">Settings</div>
+            <div class="page-sub" id="settings-sub">Customize your experience</div>
+          </div>
+        </div>
+        <div class="settings-grid">
+          <div class="card">
+            <div class="setting-section" id="set-appear">🎨 Appearance</div>
+            <div class="setting-row">
+              <label class="setting-label" id="set-theme-l">Theme</label>
+              <div class="color-swatches">
+                <div class="cswatch active" style="background: linear-gradient(135deg, #C9A84C, #0F0E0C)" data-bg="#0F0E0C" data-s="#1C1917" data-s2="#242118" data-b="#2E2A24" data-g="#C9A84C" onclick="applyTheme(this)"></div>
+                <div class="cswatch" style="background: linear-gradient(135deg, #4AAECC, #0C1418)" data-bg="#0C1418" data-s="#131C22" data-s2="#1A2530" data-b="#243040" data-g="#4AAECC" onclick="applyTheme(this)"></div>
+                <div class="cswatch" style="background: linear-gradient(135deg, #82C462, #0E140C)" data-bg="#0E140C" data-s="#141C10" data-s2="#1C2618" data-b="#283420" data-g="#82C462" onclick="applyTheme(this)"></div>
+                <div class="cswatch" style="background: linear-gradient(135deg, #C49AE0, #140F1A)" data-bg="#140F1A" data-s="#1C1424" data-s2="#241C30" data-b="#302040" data-g="#C49AE0" onclick="applyTheme(this)"></div>
+                <div class="cswatch" style="background: linear-gradient(135deg, #E07070, #180C0C)" data-bg="#180C0C" data-s="#221010" data-s2="#2C1414" data-b="#401818" data-g="#E07070" onclick="applyTheme(this)"></div>
+                <div class="cswatch" style="background: linear-gradient(135deg, #C8C0B4, #A09890)" data-bg="#F0EAE0" data-s="#E4DDD4" data-s2="#D8D0C4" data-b="#C8C0B4" data-g="#3A3530" onclick="applyTheme(this)"></div>
+                <div class="cswatch" style="background: linear-gradient(135deg, #000000, #1A1A1A)" data-bg="#000000" data-s="#0A0A0A" data-s2="#121212" data-b="#222222" data-g="#FFFFFF" onclick="applyTheme(this)"></div>
+              </div>
+            </div>
+            <div class="setting-row">
+              <label class="setting-label" id="set-name-l">Display Name</label>
+              <input type="text" id="setName" placeholder="Your name">
+            </div>
+            <button class="btn btn-gold" onclick="saveSettings()" id="save-settings-btn" style="margin-top:8px;">Save Changes</button>
+          </div>
+          <div class="card">
+            <div class="setting-section" id="set-data">📊 Data</div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px">
+              <button class="btn btn-ghost btn-sm" onclick="exportData()" id="export-btn">⬇️ Export</button>
+              <label class="btn btn-ghost btn-sm" style="cursor:pointer" id="import-btn">⬆️ Import<input type="file" accept=".json" onchange="importData(event)" style="display:none"></label>
+              <button class="btn btn-danger btn-sm" onclick="clearAll()" id="clear-btn">🗑️ Clear All</button>
+            </div>
+            <div style="margin-top:24px">
+              <div class="setting-section">🔑 License</div>
+              <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px">Your license key is active. To use on a different device, lock and re-enter your key there.</p>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// Cinematic intro -> launch app
+window.addEventListener('DOMContentLoaded', () => {
+  initApp();
+  setTimeout(() => {
+    const intro = document.getElementById('introScreen');
+    intro.classList.add('fade-out');
+    setTimeout(() => intro.remove(), 950);
+  }, 2600);
+});
+
+// ── I18N ──
+const T = {
+  en: {
+    dashboard:'Dashboard', habits:'Habits', tasks:'Tasks', goals:'Goals',
+    ai:'AI Coach', settings:'Settings', main:'Main', tools:'Tools',
+    'dash-title':'Good morning ✦', 'dash-sub':'Here\'s your productivity overview',
+    'dash-upcoming':'Upcoming Tasks', 'dash-today-habits':'Today\'s Habits',
+    'habits-title':'Habit Tracker', 'habits-sub':'Build consistency day by day',
+    'tasks-title':'Task Manager', 'tasks-sub':'Organize and conquer your to-do list',
+    'goals-title':'Goals', 'goals-sub':'Set milestones, track your journey',
+    'ai-title':'AI Coach ✦', 'ai-sub':'Your personal productivity assistant',
+    'settings-title':'Settings', 'settings-sub':'Customize your experience',
+    'add-habit':'New Habit', 'habit-name':'Habit Name', 'habit-icon':'Icon', 'add':'+ Add',
+    'add-task':'New Task', 'task':'Task', 'priority':'Priority', 'due':'Due Date', 'status':'Status',
+    'add-goal':'New Goal', 'goal':'Goal', 'category':'Category', 'progress':'Progress %', 'deadline':'Deadline',
+    'active-habits':'Active Habits', 'tasks-done':'Tasks Done', 'active-goals':'Active Goals', 'completion':'Completion Rate',
+    'no-habits':'No habits yet. Add your first one!', 'no-tasks':'No tasks yet!', 'no-goals':'No goals yet. Dream big!',
+    'appear':'🎨 Appearance', 'theme':'Theme', 'display-name':'Display Name', 'save':'Save Changes',
+    'data':'📊 Data', 'export':'⬇ Export', 'import':'⬆ Import', 'clear':'🗑 Clear All',
+    high:'🔴 High', mid:'🟡 Medium', low:'🟢 Low',
+    done:'✅ Done', inprogress:'⏳ In Progress', pending:'📌 Pending', cancelled:'❌ Cancelled',
+    health:'Health', finance:'Finance', learning:'Learning', career:'Career', personal:'Personal', other:'Other',
+    'th-task':'Task', 'th-pri':'Priority', 'th-due':'Due', 'th-status':'Status', 'th-del':'Delete',
+    'qp1':'💡 Analyze my habits', 'qp2':'📋 Suggest tasks for today', 'qp3':'🎯 Help me set a goal', 'qp4':'⚡ How to be more productive?',
+    'ai-welcome':'Hi! I\'m your PeakPlan AI Coach. How can I help you today?',
+    'ask-placeholder':'Ask your AI Coach anything...',
+    'habit-added':'Habit added ✓', 'task-added':'Task added ✓', 'goal-added':'Goal added ✓',
+    'settings-saved':'Settings saved ✓', 'exported':'Data exported ✓', 'imported':'Data imported ✓', 'cleared':'Data cleared',
+    'enter-habit':'Please enter a habit name', 'enter-task':'Please enter a task name', 'enter-goal':'Please enter a goal',
+  },
+  ar: {
+    dir:'rtl',
+    dashboard:'الرئيسية', habits:'العادات', tasks:'المهام', goals:'الأهداف',
+    ai:'مدرب AI', settings:'الإعدادات', main:'القائمة', tools:'الأدوات',
+    'dash-title':'صباح الخير ✦', 'dash-sub':'نظرة عامة على إنتاجيتك',
+    'dash-upcoming':'المهام القادمة', 'dash-today-habits':'عادات اليوم',
+    'habits-title':'متابعة العادات', 'habits-sub':'ابنِ الاتساق يوماً بيوم',
+    'tasks-title':'إدارة المهام', 'tasks-sub':'نظّم مهامك وأنجزها',
+    'goals-title':'الأهداف', 'goals-sub':'ضع معالم وتابع رحلتك',
+    'ai-title':'مدرب الذكاء الاصطناعي ✦', 'ai-sub':'مساعدك الشخصي للإنتاجية',
+    'settings-title':'الإعدادات', 'settings-sub':'خصّص تجربتك',
+    'add-habit':'عادة جديدة', 'habit-name':'اسم العادة', 'habit-icon':'أيقونة', 'add':'+ إضافة',
+    'add-task':'مهمة جديدة', 'task':'المهمة', 'priority':'الأولوية', 'due':'تاريخ التسليم', 'status':'الحالة',
+    'add-goal':'هدف جديد', 'goal':'الهدف', 'category':'الفئة', 'progress':'النسبة %', 'deadline':'الموعد النهائي',
+    'active-habits':'عادات نشطة', 'tasks-done':'مهام منجزة', 'active-goals':'أهداف نشطة', 'completion':'معدل الإنجاز',
+    'no-habits':'لا توجد عادات. أضف أولى عاداتك!', 'no-tasks':'لا توجد مهام بعد!', 'no-goals':'لا أهداف بعد. فكّر بكبر!',
+    'appear':'🎨 المظهر', 'theme':'الثيم', 'display-name':'الاسم المعروض', 'save':'حفظ التغييرات',
+    'data':'📊 البيانات', 'export':'⬇ تصدير', 'import':'⬆ استيراد', 'clear':'🗑 مسح الكل',
+    high:'🔴 عالية', mid:'🟡 متوسطة', low:'🟢 منخفضة',
+    done:'✅ منجزة', inprogress:'⏳ قيد التنفيذ', pending:'📌 معلقة', cancelled:'❌ ملغاة',
+    health:'صحة', finance:'مالية', learning:'تعلم', career:'مسار مهني', personal:'شخصي', other:'أخرى',
+    'th-task':'المهمة', 'th-pri':'الأولوية', 'th-due':'التاريخ', 'th-status':'الحالة', 'th-del':'حذف',
+    'qp1':'💡 حلّل عاداتي', 'qp2':'📋 اقترح مهام اليوم', 'qp3':'🎯 ساعدني في تحديد هدف', 'qp4':'⚡ كيف أكون أكثر إنتاجية؟',
+    'ai-welcome':'مرحباً! أنا مدرب الذكاء الاصطناعي من PeakPlan. كيف يمكنني مساعدتك؟',
+    'ask-placeholder':'اسأل مدربك...',
+    'habit-added':'تمت إضافة العادة ✓', 'task-added':'تمت إضافة المهمة ✓', 'goal-added':'تمت إضافة الهدف ✓',
+    'settings-saved':'تم حفظ الإعدادات ✓', 'exported':'تم التصدير ✓', 'imported':'تم الاستيراد ✓', 'cleared':'تم مسح البيانات',
+    'enter-habit':'أدخل اسم العادة', 'enter-task':'أدخل اسم المهمة', 'enter-goal':'أدخل الهدف',
+  },
+  es: {
+    dashboard:'Inicio', habits:'Hábitos', tasks:'Tareas', goals:'Metas', ai:'Coach IA', settings:'Ajustes', main:'Principal', tools:'Herramientas',
+    'dash-title':'Buenos días ✦','dash-sub':'Resumen de tu productividad','dash-upcoming':'Próximas tareas','dash-today-habits':'Hábitos de hoy',
+    'habits-title':'Seguimiento de hábitos','habits-sub':'Construye consistencia día a día',
+    'tasks-title':'Gestión de tareas','tasks-sub':'Organiza y conquista tu lista',
+    'goals-title':'Metas','goals-sub':'Establece hitos y sigue tu camino',
+    'ai-title':'Coach IA ✦','ai-sub':'Tu asistente personal de productividad',
+    'settings-title':'Ajustes','settings-sub':'Personaliza tu experiencia',
+    'add-habit':'Nuevo hábito','habit-name':'Nombre del hábito','habit-icon':'Ícono','add':'+ Agregar',
+    'add-task':'Nueva tarea','task':'Tarea','priority':'Prioridad','due':'Fecha límite','status':'Estado',
+    'add-goal':'Nueva meta','goal':'Meta','category':'Categoría','progress':'Progreso %','deadline':'Fecha límite',
+    'active-habits':'Hábitos activos','tasks-done':'Tareas completadas','active-goals':'Metas activas','completion':'Tasa de completado',
+    'no-habits':'Sin hábitos aún.','no-tasks':'Sin tareas aún.','no-goals':'Sin metas. ¡Sueña en grande!',
+    'appear':'🎨 Apariencia','theme':'Tema','display-name':'Nombre','save':'Guardar cambios',
+    'data':'📊 Datos','export':'⬇ Exportar','import':'⬆ Importar','clear':'🗑 Borrar todo',
+    high:'🔴 Alta',mid:'🟡 Media',low:'🟢 Baja',done:'✅ Hecho',inprogress:'⏳ En progreso',pending:'📌 Pendiente',cancelled:'❌ Cancelada',
+    health:'Salud',finance:'Finanzas',learning:'Aprendizaje',career:'Carrera',personal:'Personal',other:'Otro',
+    'th-task':'Tarea','th-pri':'Prioridad','th-due':'Fecha','th-status':'Estado','th-del':'Eliminar',
+    'qp1':'💡 Analiza mis hábitos','qp2':'📋 Sugiere tareas de hoy','qp3':'🎯 Ayúdame a establecer una meta','qp4':'⚡ ¿Cómo ser más productivo?',
+    'ai-welcome':'¡Hola! Soy tu Coach IA de PeakPlan. ¿En qué puedo ayudarte hoy?',
+    'ask-placeholder':'Pregunta lo que quieras...',
+    'habit-added':'Hábito añadido ✓','task-added':'Tarea añadida ✓','goal-added':'Meta añadida ✓',
+    'settings-saved':'Ajustes guardados ✓','exported':'Datos exportados ✓','imported':'Datos importados ✓','cleared':'Datos borrados',
+    'enter-habit':'Introduce el nombre del hábito','enter-task':'Introduce el nombre de la tarea','enter-goal':'Introduce la meta',
+  },
+  fr: {
+    dashboard:'Tableau de bord', habits:'Habitudes', tasks:'Tâches', goals:'Objectifs', ai:'Coach IA', settings:'Paramètres', main:'Principal', tools:'Outils',
+    'dash-title':'Bonjour ✦','dash-sub':'Aperçu de votre productivité','dash-upcoming':'Tâches à venir','dash-today-habits':'Habitudes du jour',
+    'habits-title':'Suivi des habitudes','habits-sub':'Construisez la constance jour après jour',
+    'tasks-title':'Gestionnaire de tâches','tasks-sub':'Organisez et accomplissez votre liste',
+    'goals-title':'Objectifs','goals-sub':'Fixez des jalons, suivez votre progression',
+    'ai-title':'Coach IA ✦','ai-sub':'Votre assistant personnel de productivité',
+    'settings-title':'Paramètres','settings-sub':'Personnalisez votre expérience',
+    'add-habit':'Nouvelle habitude','habit-name':"Nom de l'habitude",'habit-icon':'Icône','add':'+ Ajouter',
+    'add-task':'Nouvelle tâche','task':'Tâche','priority':'Priorité','due':'Date limite','status':'Statut',
+    'add-goal':'Nouvel objectif','goal':'Objectif','category':'Catégorie','progress':'Progrès %','deadline':'Échéance',
+    'active-habits':'Habitudes actives','tasks-done':'Tâches complétées','active-goals':'Objectifs actifs','completion':'Taux de complétion',
+    'no-habits':'Pas encore d\'habitudes.','no-tasks':'Pas encore de tâches.','no-goals':'Pas encore d\'objectifs. Rêvez grand !',
+    'appear':'🎨 Apparence','theme':'Thème','display-name':'Nom affiché','save':'Enregistrer',
+    'data':'📊 Données','export':'⬇ Exporter','import':'⬆ Importer','clear':'🗑 Effacer tout',
+    high:'🔴 Haute',mid:'🟡 Moyenne',low:'🟢 Basse',done:'✅ Fait',inprogress:'⏳ En cours',pending:'📌 En attente',cancelled:'❌ Annulée',
+    health:'Santé',finance:'Finance',learning:'Apprentissage',career:'Carrière',personal:'Personnel',other:'Autre',
+    'th-task':'Tâche','th-pri':'Priorité','th-due':'Date','th-status':'Statut','th-del':'Supprimer',
+    'qp1':'💡 Analyse mes habitudes','qp2':'📋 Suggère des tâches','qp3':'🎯 Aide-moi à fixer un objectif','qp4':'⚡ Comment être plus productif ?',
+    'ai-welcome':'Bonjour ! Je suis votre Coach IA PeakPlan. Comment puis-je vous aider ?',
+    'ask-placeholder':'Posez votre question...',
+    'habit-added':'Habitude ajoutée ✓','task-added':'Tâche ajoutée ✓','goal-added':'Objectif ajouté ✓',
+    'settings-saved':'Paramètres enregistrés ✓','exported':'Données exportées ✓','imported':'Données importées ✓','cleared':'Données effacées',
+    'enter-habit':"Entrez le nom de l'habitude",'enter-task':'Entrez le nom de la tâche','enter-goal':"Entrez l'objectif",
+  },
+  tr: {
+    dashboard:'Pano', habits:'Alışkanlıklar', tasks:'Görevler', goals:'Hedefler', ai:'AI Koçu', settings:'Ayarlar', main:'Ana Menü', tools:'Araçlar',
+    'dash-title':'Günaydın ✦','dash-sub':'Verimlilik özetiniz','dash-upcoming':'Yaklaşan Görevler','dash-today-habits':'Bugünün Alışkanlıkları',
+    'habits-title':'Alışkanlık Takibi','habits-sub':'Her gün tutarlılık oluşturun',
+    'tasks-title':'Görev Yöneticisi','tasks-sub':'Organize edin ve başarın',
+    'goals-title':'Hedefler','goals-sub':'Kilometre taşları belirleyin',
+    'ai-title':'AI Koçu ✦','ai-sub':'Kişisel verimlilik asistanınız',
+    'settings-title':'Ayarlar','settings-sub':'Deneyiminizi özelleştirin',
+    'add-habit':'Yeni Alışkanlık','habit-name':'Alışkanlık Adı','habit-icon':'Simge','add':'+ Ekle',
+    'add-task':'Yeni Görev','task':'Görev','priority':'Öncelik','due':'Bitiş Tarihi','status':'Durum',
+    'add-goal':'Yeni Hedef','goal':'Hedef','category':'Kategori','progress':'İlerleme %','deadline':'Son Tarih',
+    'active-habits':'Aktif Alışkanlıklar','tasks-done':'Tamamlanan Görevler','active-goals':'Aktif Hedefler','completion':'Tamamlanma Oranı',
+    'no-habits':'Henüz alışkanlık yok.','no-tasks':'Henüz görev yok.','no-goals':'Henüz hedef yok. Büyük düşün!',
+    'appear':'🎨 Görünüm','theme':'Tema','display-name':'Görünen Ad','save':'Değişiklikleri Kaydet',
+    'data':'📊 Veriler','export':'⬇ Dışa Aktar','import':'⬆ İçe Aktar','clear':'🗑 Tümünü Sil',
+    high:'🔴 Yüksek',mid:'🟡 Orta',low:'🟢 Düşük',done:'✅ Tamamlandı',inprogress:'⏳ Devam Ediyor',pending:'📌 Bekliyor',cancelled:'❌ İptal',
+    health:'Sağlık',finance:'Finans',learning:'Öğrenme',career:'Kariyer',personal:'Kişisel',other:'Diğer',
+    'th-task':'Görev','th-pri':'Öncelik','th-due':'Tarih','th-status':'Durum','th-del':'Sil',
+    'qp1':'💡 Alışkanlıklarımı analiz et','qp2':'📋 Bugün için görev öner','qp3':'🎯 Hedef belirlememe yardım et','qp4':'⚡ Nasıl daha verimli olabilirim?',
+    'ai-welcome':'Merhaba! Ben PeakPlan AI Koçunuzum. Size nasıl yardımcı olabilirim?',
+    'ask-placeholder':'AI Koçunuza sorun...',
+    'habit-added':'Alışkanlık eklendi ✓','task-added':'Görev eklendi ✓','goal-added':'Hedef eklendi ✓',
+    'settings-saved':'Ayarlar kaydedildi ✓','exported':'Veriler dışa aktarıldı ✓','imported':'Veriler içe aktarıldı ✓','cleared':'Veriler silindi',
+    'enter-habit':'Alışkanlık adını girin','enter-task':'Görev adını girin','enter-goal':'Hedefi girin',
+  }
+};
+
+let lang = 'en';
+let t = T[lang];
+
+function tr(k) { return t[k] || T.en[k] || k; }
+
+function setLang(l) {
+  lang = l; t = T[l];
+  document.documentElement.lang = l;
+  document.documentElement.dir = t.dir || 'ltr';
+  applyTranslations();
+  save();
+}
+
+function applyTranslations() {
+  document.documentElement.dir = t.dir || 'ltr';
+  document.getElementById('nav-main-label').textContent = tr('main');
+  document.getElementById('nav-tools-label').textContent = tr('tools');
+  document.getElementById('nav-dashboard').textContent = tr('dashboard');
+  document.getElementById('nav-habits').textContent = tr('habits');
+  document.getElementById('nav-tasks').textContent = tr('tasks');
+  document.getElementById('nav-goals').textContent = tr('goals');
+  document.getElementById('nav-ai').textContent = tr('ai');
+  document.getElementById('nav-settings').textContent = tr('settings');
+  document.getElementById('dash-title').textContent = tr('dash-title');
+  document.getElementById('dash-sub').textContent = tr('dash-sub');
+  document.getElementById('dash-upcoming').textContent = tr('dash-upcoming');
+  document.getElementById('dash-today-habits').textContent = tr('dash-today-habits');
+  document.getElementById('habits-title').textContent = tr('habits-title');
+  document.getElementById('habits-sub').textContent = tr('habits-sub');
+  document.getElementById('tasks-title').textContent = tr('tasks-title');
+  document.getElementById('tasks-sub').textContent = tr('tasks-sub');
+  document.getElementById('goals-title').textContent = tr('goals-title');
+  document.getElementById('goals-sub').textContent = tr('goals-sub');
+  document.getElementById('ai-title').textContent = tr('ai-title');
+  document.getElementById('ai-sub').textContent = tr('ai-sub');
+  document.getElementById('settings-title').textContent = tr('settings-title');
+  document.getElementById('settings-sub').textContent = tr('settings-sub');
+  document.getElementById('ds-habits-l').textContent = tr('active-habits');
+  document.getElementById('ds-tasks-l').textContent = tr('tasks-done');
+  document.getElementById('ds-goals-l').textContent = tr('active-goals');
+  document.getElementById('ds-streak-l').textContent = tr('completion');
+  document.getElementById('add-habit-label').textContent = tr('add-habit');
+  document.getElementById('habit-name-label').textContent = tr('habit-name');
+  document.getElementById('habit-icon-label').textContent = tr('habit-icon');
+  document.getElementById('add-habit-btn').textContent = tr('add');
+  document.getElementById('no-habits-text').textContent = tr('no-habits');
+  document.getElementById('add-task-label').textContent = tr('add-task');
+  document.getElementById('task-name-l').textContent = tr('task');
+  document.getElementById('task-pri-l').textContent = tr('priority');
+  document.getElementById('task-date-l').textContent = tr('due');
+  document.getElementById('task-status-l').textContent = tr('status');
+  document.getElementById('add-task-btn').textContent = tr('add');
+  document.getElementById('no-tasks-text').textContent = tr('no-tasks');
+  document.getElementById('th-task').textContent = tr('th-task');
+  document.getElementById('th-pri').textContent = tr('th-pri');
+  document.getElementById('th-date').textContent = tr('th-due');
+  document.getElementById('th-status').textContent = tr('th-status');
+  document.getElementById('th-del').textContent = tr('th-del');
+  document.getElementById('st-total-l').textContent = tr('task');
+  document.getElementById('st-done-l').textContent = tr('done');
+  document.getElementById('st-prog-l').textContent = tr('inprogress');
+  document.getElementById('st-pend-l').textContent = tr('pending');
+  document.getElementById('pri-high').textContent = tr('high');
+  document.getElementById('pri-mid').textContent = tr('mid');
+  document.getElementById('pri-low').textContent = tr('low');
+  document.getElementById('s-inprog').textContent = tr('inprogress');
+  document.getElementById('s-pend').textContent = tr('pending');
+  document.getElementById('s-done').textContent = tr('done');
+  document.getElementById('s-cancel').textContent = tr('cancelled');
+  document.getElementById('add-goal-label').textContent = tr('add-goal');
+  document.getElementById('goal-name-l').textContent = tr('goal');
+  document.getElementById('goal-cat-l').textContent = tr('category');
+  document.getElementById('goal-pct-l').textContent = tr('progress');
+  document.getElementById('goal-dl-l').textContent = tr('deadline');
+  document.getElementById('add-goal-btn').textContent = tr('add');
+  document.getElementById('no-goals-text').textContent = tr('no-goals');
+  document.getElementById('gc-health').textContent = tr('health');
+  document.getElementById('gc-finance').textContent = tr('finance');
+  document.getElementById('gc-learn').textContent = tr('learning');
+  document.getElementById('gc-career').textContent = tr('career');
+  document.getElementById('gc-personal').textContent = tr('personal');
+  document.getElementById('gc-other').textContent = tr('other');
+  document.getElementById('qp1').textContent = tr('qp1');
+  document.getElementById('qp2').textContent = tr('qp2');
+  document.getElementById('qp3').textContent = tr('qp3');
+  document.getElementById('qp4').textContent = tr('qp4');
+  document.getElementById('aiInput').placeholder = tr('ask-placeholder');
+  document.getElementById('set-appear').textContent = tr('appear');
+  document.getElementById('set-theme-l').textContent = tr('theme');
+  document.getElementById('set-name-l').textContent = tr('display-name');
+  document.getElementById('save-settings-btn').textContent = tr('save');
+  document.getElementById('set-data').textContent = tr('data');
+  document.getElementById('export-btn').textContent = tr('export');
+  document.getElementById('clear-btn').textContent = tr('clear');
+  renderTasks(); renderGoals(); renderDash();
+}
+
+// ── STATE ──
+let state = { habits:[], tasks:[], goals:[], habitData:{}, currentMonth: new Date().getMonth(), currentYear: new Date().getFullYear() };
+
+function save() {
+  const key = localStorage.getItem('pp_license') || 'default';
+  localStorage.setItem('pp_data_' + key, JSON.stringify(state));
+}
+
+function loadData() {
+  const key = localStorage.getItem('pp_license') || 'default';
+  try {
+    const stored = localStorage.getItem('pp_data_' + key);
+    return stored ? JSON.parse(stored) : { habits:[], tasks:[], goals:[], habitData:{}, currentMonth: new Date().getMonth(), currentYear: new Date().getFullYear() };
+  } catch { return { habits:[], tasks:[], goals:[], habitData:{}, currentMonth: new Date().getMonth(), currentYear: new Date().getFullYear() }; }
+}
+
+function initApp() {
+  document.getElementById('app').classList.add('show');
+  state = loadData();
+  const savedLang = localStorage.getItem('pp_lang') || 'en';
+  lang = savedLang; t = T[lang];
+  document.querySelector('.lang-select').value = lang;
+  const savedName = localStorage.getItem('pp_name') || 'Pro User';
+  document.getElementById('userName').textContent = savedName;
+  document.getElementById('userAvatar').textContent = savedName[0].toUpperCase();
+  document.getElementById('setName').value = savedName;
+  applyTranslations();
+  updateDate();
+  renderHabits();
+  renderTasks();
+  renderGoals();
+  renderDash();
+  switchPage('dashboard', document.querySelector('.nav-item'));
+}
+
+// ── NAVIGATION ──
+function switchPage(page, el) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  if (el) el.classList.add('active');
+  document.getElementById('sec-' + page).classList.add('active');
+  if (page === 'tasks') updateTaskStats();
+  if (page === 'dashboard') renderDash();
+  if (window.innerWidth < 768) document.getElementById('sidebar').classList.remove('open');
+}
+
+function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+
+function updateDate() {
+  const d = new Date();
+  document.getElementById('topDate').textContent = d.toLocaleDateString(lang === 'ar' ? 'ar-SA' : lang + '-' + lang.toUpperCase(), { weekday:'short', month:'short', day:'numeric' });
+}
+
+// ── EMOJI ──
+let selEmojiVal = '⭐';
+function selEmoji(el) {
+  document.querySelectorAll('.emoji-opt').forEach(e => e.classList.remove('sel'));
+  el.classList.add('sel'); selEmojiVal = el.dataset.e;
+}
+
+// ── HABITS ──
+function addHabit() {
+  const name = document.getElementById('newHabitName').value.trim();
+  if (!name) return toast(tr('enter-habit'));
+  state.habits.push({ id: Date.now(), name, emoji: selEmojiVal });
+  document.getElementById('newHabitName').value = '';
+  save(); renderHabits(); toast(tr('habit-added'));
+}
+
+function deleteHabit(id) { state.habits = state.habits.filter(h => h.id !== id); save(); renderHabits(); }
+
+function changeMonth(d) {
+  state.currentMonth += d;
+  if (state.currentMonth > 11) { state.currentMonth = 0; state.currentYear++; }
+  if (state.currentMonth < 0) { state.currentMonth = 11; state.currentYear--; }
+  renderHabits();
+}
+
+function renderHabits() {
+  const { currentMonth: m, currentYear: y, habits } = state;
+  const days = new Date(y, m+1, 0).getDate();
+  const mNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('monthTitle').textContent = mNames[m] + ' ' + y;
+  const empty = document.getElementById('habitEmpty');
+  const grid = document.getElementById('habitGrid');
+  if (!habits.length) { grid.style.display='none'; empty.style.display='block'; return; }
+  grid.style.display='table'; empty.style.display='none';
+  let head = '<tr><th style="text-align:left;padding-left:14px">' + tr('habits') + '</th>';
+  for (let i=1;i<=days;i++) head += `<th>${i}</th>`;
+  head += '<th>%</th></tr>';
+  document.getElementById('habitHead').innerHTML = head;
+  let body = '';
+  habits.forEach(h => {
+    let tot = 0;
+    let row = `<tr><td><div class="habit-name-row"><button class="habit-del" onclick="deleteHabit(${h.id})">×</button><span>${h.emoji}</span><span>${h.name}</span></div></td>`;
+    for (let d=1;d<=days;d++) {
+      const k = `${h.id}-${y}-${m}-${d}`;
+      const chk = state.habitData[k] ? 'checked' : '';
+      if (state.habitData[k]) tot++;
+      row += `<td><input type="checkbox" ${chk} onchange="toggleHabit('${k}',this)"></td>`;
+    }
+    const pct = Math.round((tot/days)*100);
+    row += `<td class="habit-total">${pct}%<div class="pbar"><div class="pbar-fill" style="width:${pct}%"></div></div></td></tr>`;
+    body += row;
+  });
+  document.getElementById('habitBody').innerHTML = body;
+}
+
+function toggleHabit(k, el) { state.habitData[k] = el.checked; save(); renderHabits(); }
+
+// ── TASKS ──
+function addTask() {
+  const name = document.getElementById('taskName').value.trim();
+  if (!name) return toast(tr('enter-task'));
+  state.tasks.unshift({ id: Date.now(), name, priority: document.getElementById('taskPri').value, date: document.getElementById('taskDate').value, status: document.getElementById('taskStatus').value, done: false });
+  document.getElementById('taskName').value = '';
+  save(); renderTasks(); updateTaskStats(); toast(tr('task-added'));
+}
+
+function toggleTask(id) {
+  const task = state.tasks.find(x => x.id === id);
+  if (task) { task.done = !task.done; task.status = task.done ? 'done' : 'inprogress'; }
+  save(); renderTasks(); updateTaskStats();
+}
+
+function deleteTask(id) { state.tasks = state.tasks.filter(x => x.id !== id); save(); renderTasks(); updateTaskStats(); }
+
+function renderTasks() {
+  const list = document.getElementById('taskList');
+  const empty = document.getElementById('taskEmpty');
+  if (!state.tasks.length) { list.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+  list.innerHTML = state.tasks.map(x => `
+    <div class="task-row ${x.done?'done':''}">
+      <input type="checkbox" class="task-cb" ${x.done?'checked':''} onchange="toggleTask(${x.id})">
+      <span class="task-name">${x.name}</span>
+      <span class="badge b-${x.priority}">${tr(x.priority)}</span>
+      <span style="font-size:12px;color:var(--text-muted)">${x.date||'—'}</span>
+      <span class="badge b-${x.status}">${tr(x.status)}</span>
+      <button class="btn btn-danger" onclick="deleteTask(${x.id})" style="padding:5px 10px;font-size:11px">${tr('th-del')}</button>
+    </div>`).join('');
+}
+
+function updateTaskStats() {
+  document.getElementById('st-total').textContent = state.tasks.length;
+  document.getElementById('st-done').textContent = state.tasks.filter(t => t.status==='done').length;
+  document.getElementById('st-prog').textContent = state.tasks.filter(t => t.status==='inprogress').length;
+  document.getElementById('st-pend').textContent = state.tasks.filter(t => t.status==='pending').length;
+}
+
+// ── GOALS ──
+function addGoal() {
+  const name = document.getElementById('goalName').value.trim();
+  if (!name) return toast(tr('enter-goal'));
+  const pct = Math.min(100, Math.max(0, parseInt(document.getElementById('goalPct').value)||0));
+  state.goals.push({ id: Date.now(), name, category: document.getElementById('goalCat').value, pct, deadline: document.getElementById('goalDL').value });
+  document.getElementById('goalName').value = '';
+  document.getElementById('goalPct').value = '';
+  save(); renderGoals(); toast(tr('goal-added'));
+}
+
+function deleteGoal(id) { state.goals = state.goals.filter(g => g.id !== id); save(); renderGoals(); }
+
+function renderGoals() {
+  const grid = document.getElementById('goalsGrid');
+  const empty = document.getElementById('goalEmpty');
+  if (!state.goals.length) { grid.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+  grid.innerHTML = state.goals.map(g => `
+    <div class="goal-card">
+      <button class="goal-del" onclick="deleteGoal(${g.id})">×</button>
+      <div class="goal-cat">${g.category}</div>
+      <div class="goal-name">${g.name}</div>
+      <div class="goal-pct"><span>${tr('progress')}</span><span>${g.pct}%</span></div>
+      <div class="goal-bar"><div class="goal-bar-fill" style="width:${g.pct}%"></div></div>
+      <div class="goal-deadline">${g.deadline ? '📅 ' + g.deadline : ''}</div>
+    </div>`).join('');
+}
+
+// ── DASHBOARD ──
+function renderDash() {
+  document.getElementById('ds-habits').textContent = state.habits.length;
+  document.getElementById('ds-tasks').textContent = state.tasks.filter(t => t.status==='done').length;
+  document.getElementById('ds-goals').textContent = state.goals.length;
+  const total = state.tasks.length;
+  const done = state.tasks.filter(t => t.done).length;
+  document.getElementById('ds-streak').textContent = total ? Math.round((done/total)*100)+'%' : '0%';
+  const upcoming = state.tasks.filter(t => !t.done).slice(0,5);
+  const dtEl = document.getElementById('dashTasks');
+  if (!upcoming.length) { dtEl.innerHTML = `<div style="font-size:13px;color:var(--text-dim);padding:20px 0;text-align:center">${tr('no-tasks')}</div>`; }
+  else { dtEl.innerHTML = upcoming.map(t => `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px"><span style="color:var(--text)">${t.name}</span><span class="badge b-${t.priority}">${tr(t.priority)}</span></div>`).join(''); }
+  const today = new Date();
+  const d = today.getDate(), m = today.getMonth(), y = today.getFullYear();
+  const dhEl = document.getElementById('dashHabits');
+  if (!state.habits.length) { dhEl.innerHTML = `<div style="font-size:13px;color:var(--text-dim);padding:20px 0;text-align:center">${tr('no-habits')}</div>`; }
+  else { dhEl.innerHTML = state.habits.map(h => { const k=`${h.id}-${y}-${m}-${d}`; const done=state.habitData[k]; return `<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);font-size:13px"><span>${h.emoji} ${h.name}</span><span style="color:${done?'var(--success)':'var(--text-dim)'}">${done?'✓':'○'}</span></div>`; }).join(''); }
+}
+
+// ── AI COACH ──
+async function sendAI() {
+  const GEMINI_API_KEY = "AQ.Ab8RN6LCdD7JyFWsLUIxfk47PA0Za_gTu_159RRSDEhNrSwRlg";
+  const msg = document.getElementById('aiInput').value.trim();
+  if (!msg) return;
+  appendMsg('user', msg);
+  document.getElementById('aiInput').value = '';
+  document.getElementById('aiTyping').style.display = 'flex';
+  document.getElementById('aiSendBtn').disabled = true;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contents: [{ parts: [{ text: msg }] }] })
+    });
+    const data = await res.json();
+    document.getElementById('aiTyping').style.display = 'none';
+    if (data.candidates && data.candidates[0].content.parts[0].text) {
+      appendMsg('ai', data.candidates[0].content.parts[0].text);
+    } else {
+      appendMsg('ai', 'Sorry, I could not respond right now.');
+    }
+  } catch(e) {
+    document.getElementById('aiTyping').style.display = 'none';
+    appendMsg('ai', 'Connection error. Please try again.');
+  }
+  document.getElementById('aiSendBtn').disabled = false;
+}
+
+function appendMsg(role, text) {
+  const msgs = document.getElementById('aiMessages');
+  const div = document.createElement('div');
+  div.className = `msg ${role}`;
+  div.innerHTML = `<div class="msg-avatar">${role==='ai'?'✨':'👤'}</div><div class="msg-bubble"></div>`;
+  msgs.appendChild(div);
+  const bubble = div.querySelector('.msg-bubble');
+  if (role === 'user') {
+    bubble.textContent = text;
+    msgs.scrollTop = msgs.scrollHeight;
+  } else {
+    const formatted = typeof marked !== 'undefined' ? marked.parse(text) : text;
+    let idx = 0;
+    const tokens = formatted.match(/[^ ]+ +|[^ ]+/g) || [formatted];
+    let cur = '';
+    const interval = setInterval(() => {
+      if (idx < tokens.length) { cur += tokens[idx]; bubble.innerHTML = cur; msgs.scrollTop = msgs.scrollHeight; idx++; }
+      else clearInterval(interval);
+    }, 30);
+  }
+}
+
+function quickPrompt(el) {
+  document.getElementById('aiInput').value = el.textContent;
+  sendAI();
+}
+
+document.getElementById('aiInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendAI(); }
+});
+
+/* ════════════════════════════════════════
+   ✦ PEAKPLAN PREMIUM MOTION ENGINE ✦
+════════════════════════════════════════ */
+(function() {
+
+  /* ── Scroll progress bar ── */
+  const bar = document.getElementById('pp-progress');
+  document.querySelector('.main-content')?.addEventListener('scroll', function() {
+    const pct = this.scrollTop / (this.scrollHeight - this.clientHeight) * 100;
+    bar.style.width = pct + '%';
+  });
+  window.addEventListener('scroll', () => {
+    const pct = window.scrollY / (document.body.scrollHeight - window.innerHeight) * 100;
+    bar.style.width = pct + '%';
+  });
+
+  /* ── Aurora Bands ── */
+  const auroraEl = document.getElementById('pp-aurora');
+  const auroraColors = [
+    'rgba(212,175,85,0.07)', 'rgba(180,140,60,0.05)',
+    'rgba(100,160,220,0.04)', 'rgba(160,100,220,0.04)', 'rgba(80,200,160,0.035)'
+  ];
+  const auroraConfigs = [
+    { w:700, h:350, left:'5%',  top:'10%',  dur:22 },
+    { w:600, h:400, left:'40%', top:'5%',   dur:28 },
+    { w:800, h:300, left:'60%', top:'40%',  dur:34 },
+    { w:500, h:500, left:'15%', top:'55%',  dur:26 },
+    { w:650, h:280, left:'75%', top:'15%',  dur:30 },
+  ];
+  auroraConfigs.forEach((cfg, i) => {
+    const band = document.createElement('div');
+    band.className = 'aurora-band';
+    band.style.cssText = `
+      width:${cfg.w}px; height:${cfg.h}px;
+      left:${cfg.left}; top:${cfg.top};
+      background: radial-gradient(ellipse at center, ${auroraColors[i]} 0%, transparent 70%);
+      animation-duration: ${cfg.dur}s;
+      animation-delay: -${(i * cfg.dur / 5).toFixed(1)}s;
+    `;
+    auroraEl.appendChild(band);
+  });
+
+  /* ── Floating orbs (keep smaller) ── */
+  const orbsEl = document.getElementById('pp-orbs');
+  for (let i = 0; i < 3; i++) {
+    const orb = document.createElement('div');
+    orb.className = 'pp-orb';
+    const size = 120 + Math.random() * 180;
+    orb.style.cssText = `
+      width:${size}px; height:${size}px;
+      left:${Math.random() * 100}%; top:${50 + Math.random() * 60}%;
+      animation-duration:${20 + Math.random() * 14}s;
+      animation-delay:-${Math.random() * 10}s;
+      opacity:${0.3 + Math.random() * 0.3};
+    `;
+    orbsEl.appendChild(orb);
+  }
+
+  /* ── Stardust Canvas ── */
+  const canvas = document.getElementById('pp-stardust');
+  const ctx = canvas.getContext('2d');
+  let W, H, stars = [];
+  function resizeCanvas() {
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+  for (let i = 0; i < 120; i++) {
+    stars.push({
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * window.innerHeight,
+      r: 0.3 + Math.random() * 1.2,
+      vx: (Math.random() - 0.5) * 0.12,
+      vy: (Math.random() - 0.5) * 0.08,
+      a: Math.random(),
+      va: 0.003 + Math.random() * 0.008,
+      color: Math.random() > 0.7 ? [212,175,85] : [220,210,190]
+    });
+  }
+  function drawStars() {
+    ctx.clearRect(0, 0, W, H);
+    stars.forEach(s => {
+      s.x += s.vx; s.y += s.vy;
+      s.a += s.va;
+      const alpha = (Math.sin(s.a) * 0.5 + 0.5) * 0.55;
+      if (s.x < 0) s.x = W; if (s.x > W) s.x = 0;
+      if (s.y < 0) s.y = H; if (s.y > H) s.y = 0;
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${s.color[0]},${s.color[1]},${s.color[2]},${alpha})`;
+      ctx.fill();
+    });
+    requestAnimationFrame(drawStars);
+  }
+  drawStars();
+
+  /* ── Mouse-reactive stat card halo ── */
+  document.querySelectorAll('.stat-card').forEach(card => {
+    card.addEventListener('mousemove', function(e) {
+      const r = this.getBoundingClientRect();
+      const mx = ((e.clientX - r.left) / r.width * 100).toFixed(1);
+      const my = ((e.clientY - r.top) / r.height * 100).toFixed(1);
+      this.style.setProperty('--mx', mx + '%');
+      this.style.setProperty('--my', my + '%');
+    });
+  });
+
+  /* ── Nav ripple effect ── */
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', function(e) {
+      const r = document.createElement('span');
+      r.className = 'pp-ripple';
+      const rect = this.getBoundingClientRect();
+      r.style.left = (e.clientX - rect.left - 20) + 'px';
+      r.style.top  = (e.clientY - rect.top  - 20) + 'px';
+      this.appendChild(r);
+      setTimeout(() => r.remove(), 560);
+    });
+  });
+
+  /* ── Animated stat counters ── */
+  function animateCounter(el, target) {
+    const start = parseInt(el.textContent) || 0;
+    const isPercent = String(target).includes('%');
+    const end = parseInt(target);
+    if (start === end) return;
+    const dur = 700;
+    const startTime = performance.now();
+    el.classList.add('counting');
+    setTimeout(() => el.classList.remove('counting'), 900);
+    function tick(now) {
+      const p = Math.min((now - startTime) / dur, 1);
+      const ease = 1 - Math.pow(1 - p, 3);
+      const val = Math.round(start + (end - start) * ease);
+      el.textContent = isPercent ? val + '%' : val;
+      if (p < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  /* ── Intercept switchPage for stat animation ── */
+  const _origSwitch = window.switchPage;
+  window.switchPage = function(page, el) {
+    _origSwitch(page, el);
+    setTimeout(() => {
+      document.querySelectorAll('.stat-num').forEach(numEl => {
+        animateCounter(numEl, numEl.textContent);
+      });
+    }, 80);
+  };
+
+  /* ── Intercept renderDash / updateTaskStats for animated counters ── */
+  const _origRenderDash = window.renderDash;
+  window.renderDash = function() {
+    _origRenderDash();
+    setTimeout(() => {
+      document.querySelectorAll('#sec-dashboard .stat-num, #sec-tasks .stat-num').forEach(el => {
+        animateCounter(el, el.textContent);
+      });
+    }, 40);
+  };
+
+  const _origUpdateTaskStats = window.updateTaskStats;
+  window.updateTaskStats = function() {
+    _origUpdateTaskStats();
+    setTimeout(() => {
+      document.querySelectorAll('#sec-tasks .stat-num').forEach(el => {
+        animateCounter(el, el.textContent);
+      });
+    }, 40);
+  };
+
+  /* ── 3D tilt on stat cards (mouse parallax) ── */
+  function addTilt(selector) {
+    document.querySelectorAll(selector).forEach(card => {
+      card.addEventListener('mousemove', function(e) {
+        const rect = this.getBoundingClientRect();
+        const x = (e.clientX - rect.left) / rect.width  - 0.5;
+        const y = (e.clientY - rect.top)  / rect.height - 0.5;
+        this.style.transform = `perspective(600px) rotateX(${-y * 10}deg) rotateY(${x * 10}deg) translateY(-4px) scale(1.025)`;
+      });
+      card.addEventListener('mouseleave', function() {
+        this.style.transform = '';
+      });
+    });
+  }
+  addTilt('.stat-card');
+
+  /* ── Goal bar animated width on page enter ── */
+  const _origRenderGoals = window.renderGoals;
+  window.renderGoals = function() {
+    _origRenderGoals();
+    setTimeout(() => {
+      document.querySelectorAll('.goal-bar-fill').forEach(bar => {
+        const w = bar.style.width;
+        bar.style.width = '0%';
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => { bar.style.width = w; });
+        });
+      });
+    }, 50);
+  };
+
+  /* ── Task rows stagger on render ── */
+  const _origRenderTasks = window.renderTasks;
+  window.renderTasks = function() {
+    _origRenderTasks();
+    setTimeout(() => {
+      document.querySelectorAll('.task-row').forEach((row, i) => {
+        row.style.animationDelay = (i * 0.05) + 's';
+      });
+    }, 10);
+  };
+
+  /* ── Smooth card appear on goal add ── */
+  const _origAddGoal = window.addGoal;
+  window.addGoal = function() {
+    _origAddGoal();
+    setTimeout(() => {
+      const cards = document.querySelectorAll('.goal-card');
+      if (cards.length) {
+        const newest = cards[cards.length - 1];
+        newest.style.animation = 'ppCardUp 0.5s cubic-bezier(.16,1,.3,1) both';
+      }
+      document.querySelectorAll('.goal-bar-fill').forEach(bar => {
+        const w = bar.style.width;
+        bar.style.width = '0%';
+        requestAnimationFrame(() => requestAnimationFrame(() => { bar.style.width = w; }));
+      });
+    }, 20);
+  };
+
+  /* ── Interactive magnetic buttons ── */
+  document.querySelectorAll('.btn-gold, .license-btn').forEach(btn => {
+    btn.addEventListener('mousemove', function(e) {
+      const r = this.getBoundingClientRect();
+      const x = (e.clientX - r.left - r.width/2) * 0.25;
+      const y = (e.clientY - r.top  - r.height/2) * 0.25;
+      this.style.transform = `translate(${x}px, ${y}px) translateY(-2px) scale(1.04)`;
+    });
+    btn.addEventListener('mouseleave', function() {
+      this.style.transform = '';
+    });
+  });
+
+  /* ── Sidebar active item indicator scroll-to ── */
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', function() {
+      setTimeout(() => {
+        const mainContent = document.querySelector('.main-content');
+        if (mainContent) mainContent.scrollTo({ top: 0, behavior: 'smooth' });
+      }, 50);
+    });
+  });
+
+  /* ── Page title letter-by-letter reveal on switch ── */
+  function revealTitle(el) {
+    if (!el) return;
+    const text = el.textContent;
+    el.innerHTML = '';
+    el.style.opacity = '1';
+    [...text].forEach((ch, i) => {
+      const span = document.createElement('span');
+      span.textContent = ch;
+      span.style.cssText = `
+        display: inline-block;
+        opacity: 0;
+        transform: translateY(14px);
+        animation: ppCharIn 0.4s cubic-bezier(.16,1,.3,1) ${i * 0.03}s both;
+      `;
+      el.appendChild(span);
+    });
+  }
+
+  if (!document.getElementById('pp-char-anim')) {
+    const s = document.createElement('style');
+    s.id = 'pp-char-anim';
+    s.textContent = '@keyframes ppCharIn { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }';
+    document.head.appendChild(s);
+  }
+
+  const _origSwitch2 = window.switchPage;
+  window.switchPage = function(page, el) {
+    _origSwitch2(page, el);
+    setTimeout(() => {
+      const sec = document.getElementById('sec-' + page);
+      if (sec) revealTitle(sec.querySelector('.page-title'));
+      addTilt('.stat-card');
+    }, 60);
+  };
+
+  /* ── Sparkle burst on gold button click ── */
+  function spawnSparkles(btn, e) {
+    const r = btn.getBoundingClientRect();
+    const ox = e.clientX - r.left;
+    const oy = e.clientY - r.top;
+    for (let i = 0; i < 8; i++) {
+      const s = document.createElement('div');
+      const angle = (i / 8) * Math.PI * 2;
+      const dist = 30 + Math.random() * 28;
+      const tx = Math.cos(angle) * dist;
+      const ty = Math.sin(angle) * dist;
+      s.style.cssText = `
+        position:absolute; width:5px; height:5px; border-radius:50%;
+        background:${Math.random()>0.5?'var(--gold2)':'var(--gold)'};
+        left:${ox}px; top:${oy}px; pointer-events:none; z-index:999;
+        animation:ppSparkle 0.55s cubic-bezier(.16,1,.3,1) both;
+        transform-origin:center;
+        box-shadow:0 0 6px var(--gold2);
+      `;
+      s.animate([
+        { transform:`translate(-50%,-50%) scale(0)`, opacity:1 },
+        { transform:`translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) scale(1.4)`, opacity:0.8, offset:0.5 },
+        { transform:`translate(calc(-50% + ${tx*1.6}px), calc(-50% + ${ty*1.6}px)) scale(0)`, opacity:0 }
+      ], { duration: 500 + Math.random()*200, easing:'cubic-bezier(.16,1,.3,1)', fill:'forwards' });
+      btn.style.position = 'relative';
+      btn.style.overflow = 'visible';
+      btn.appendChild(s);
+      setTimeout(() => s.remove(), 750);
+    }
+  }
+  document.querySelectorAll('.btn-gold, .license-btn').forEach(btn => {
+    btn.addEventListener('click', function(e) { spawnSparkles(this, e); });
+  });
+  setInterval(() => {
+    document.querySelectorAll('.btn-gold:not([data-spark])').forEach(btn => {
+      btn.setAttribute('data-spark','1');
+      btn.addEventListener('click', function(e) { spawnSparkles(this, e); });
+    });
+  }, 1500);
+  function refreshMagnetic() {
+    document.querySelectorAll('.btn-gold:not([data-mag])').forEach(btn => {
+      btn.setAttribute('data-mag', '1');
+      btn.addEventListener('mousemove', function(e) {
+        const r = this.getBoundingClientRect();
+        const x = (e.clientX - r.left - r.width/2) * 0.25;
+        const y = (e.clientY - r.top  - r.height/2) * 0.25;
+        this.style.transform = `translate(${x}px, ${y}px) translateY(-2px) scale(1.04)`;
+      });
+      btn.addEventListener('mouseleave', function() { this.style.transform = ''; });
+    });
+  }
+  setInterval(refreshMagnetic, 1200);
+
+  /* ── Initial title reveal ── */
+  setTimeout(() => {
+    const activeSec = document.querySelector('.section.active');
+    if (activeSec) revealTitle(activeSec.querySelector('.page-title'));
+  }, 900);
+
+})();
+
+// ── SETTINGS ──
+function applyTheme(el) {
+  document.querySelectorAll('.cswatch').forEach(s => s.classList.remove('active'));
+  el.classList.add('active');
+  const r = document.documentElement.style;
+  r.setProperty('--bg', el.dataset.bg);
+  r.setProperty('--surface', el.dataset.s);
+  r.setProperty('--surface2', el.dataset.s2);
+  r.setProperty('--border', el.dataset.b);
+  r.setProperty('--gold', el.dataset.g);
+  r.setProperty('--gold2', el.dataset.g);
+  r.setProperty('--accent', el.dataset.g);
+}
+
+function saveSettings() {
+  const name = document.getElementById('setName').value.trim();
+  if (name) {
+    document.getElementById('userName').textContent = name;
+    document.getElementById('userAvatar').textContent = name[0].toUpperCase();
+    localStorage.setItem('pp_name', name);
+  }
+  localStorage.setItem('pp_lang', lang);
+  save();
+  toast(tr('settings-saved'));
+}
+
+function exportData() {
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'peakplan-backup.json';
+  a.click();
+  toast(tr('exported'));
+}
+
+function importData(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      state = JSON.parse(ev.target.result);
+      save(); renderHabits(); renderTasks(); renderGoals(); renderDash();
+      toast(tr('imported'));
+    } catch { toast('Invalid file'); }
+  };
+  reader.readAsText(file);
+}
+
+function clearAll() {
+  if (!confirm('Are you sure? This will delete all your data.')) return;
+  state = { habits:[], tasks:[], goals:[], habitData:{}, currentMonth: new Date().getMonth(), currentYear: new Date().getFullYear() };
+  save(); renderHabits(); renderTasks(); renderGoals(); renderDash();
+  toast(tr('cleared'));
+}
+
+// ── TOAST ──
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2500);
+}
+</script>
+</body>
+</html>
